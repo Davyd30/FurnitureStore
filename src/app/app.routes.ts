@@ -4,12 +4,17 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/home/pages/home/home.component').then(m => m.HomeComponent),
+      import('./pages/home/home').then(m => m.HomeComponent),
   },
   {
     path: 'catalog',
     loadComponent: () =>
-      import('./features/catalog/pages/catalog/catalog.component').then(m => m.CatalogComponent),
+      import('./features/catalog/pages/catalog/catalog').then(m => m.Catalog),
+  },
+  {
+    path: 'category/:category',
+    loadComponent: () =>
+      import('./features/categories/pages/category/category').then(m => m.CategoryComponent),
   },
   { path: '**', redirectTo: '' }
 ];

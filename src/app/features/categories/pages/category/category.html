@@ -1,0 +1,39 @@
+<div class="category-page">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a routerLink="/">Home</a>
+    <span class="separator">/</span>
+    <span class="current">{{ categoryName }}</span>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>{{ categoryName }}</h1>
+    <p class="product-count">{{ products.length }} products available</p>
+  </header>
+
+  <!-- Products Grid -->
+  <div class="products-grid" *ngIf="products.length > 0">
+    <div class="product-card" *ngFor="let product of products">
+      <div class="product-image">
+        <img [src]="product.image" [alt]="product.name">
+        <div class="product-overlay">
+          <button class="btn-view">Quick View</button>
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <div class="product-price">${{ product.price.toFixed(2) }}</div>
+        <button class="btn-add-cart">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="products.length === 0">
+    <div class="empty-icon">📦</div>
+    <h2>No products found</h2>
+    <p>We couldn't find any products in this category.</p>
+    <a routerLink="/" class="btn-back">Back to Home</a>
+  </div>
+</div>

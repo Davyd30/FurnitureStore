@@ -1,0 +1,41 @@
+<header class="header">
+  <div class="header-container">
+    <!-- Logo -->
+    <div class="logo">
+      <a href="#">FurnitureStore</a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="nav-desktop">
+      <a href="#" class="nav-link">Home</a>
+      <a href="#" class="nav-link">Categories</a>
+      <a href="#" class="nav-link">About</a>
+      <a href="#" class="nav-link">Contact</a>
+    </nav>
+
+    <!-- Cart Icon -->
+    <div class="cart-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span class="cart-count">0</span>
+    </div>
+
+    <!-- Mobile Burger Menu -->
+    <button class="burger-menu" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="nav-mobile" [class.active]="isMobileMenuOpen">
+    <a href="#" class="nav-link" (click)="closeMobileMenu()">Home</a>
+    <a href="#" class="nav-link" (click)="closeMobileMenu()">Categories</a>
+    <a href="#" class="nav-link" (click)="closeMobileMenu()">About</a>
+    <a href="#" class="nav-link" (click)="closeMobileMenu()">Contact</a>
+  </nav>
+</header>
