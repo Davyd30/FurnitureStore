@@ -1,13 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
-
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  image: string;
-}
+import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/product.interface';
 
 @Component({
   selector: 'app-featured-products',
@@ -15,42 +10,26 @@ interface Product {
   templateUrl: './featured-products.html',
   styleUrl: './featured-products.css',
 })
-export class FeaturedProductsComponent {
-  constructor(private cartService: CartService) {}
+export class FeaturedProductsComponent implements OnInit {
+  products: Product[] = [];
 
-  products: Product[] = [
-    {
-      id: 1,
-      title: 'Modern Sofa',
-      price: 899.99,
-      image: 'https://via.placeholder.com/300x250/3498db/ffffff?text=Modern+Sofa'
-    },
-    {
-      id: 2,
-      title: 'Elegant Dining Table',
-      price: 1299.99,
-      image: 'https://via.placeholder.com/300x250/e74c3c/ffffff?text=Dining+Table'
-    },
-    {
-      id: 3,
-      title: 'Comfort Armchair',
-      price: 449.99,
-      image: 'https://via.placeholder.com/300x250/2ecc71/ffffff?text=Armchair'
-    },
-    {
-      id: 4,
-      title: 'King Size Bed',
-      price: 1599.99,
-      image: 'https://via.placeholder.com/300x250/f39c12/ffffff?text=King+Bed'
-    }
-  ];
+  constructor(
+    private cartService: CartService,
+    private productService: ProductService
+  ) {}
+
+  ngOnInit(): void {
+    this.productService.getProducts().subscribe(products => {
+      this.products = products.slice(0, 4);
+    });
+  }
 
   addToCart(product: Product): void {
     this.cartService.addToCart({
-      id: product.id,
-      name: product.title,
+      id: product._id,
+      name: product.name,
       price: product.price,
-      image: product.image
+      image: product.image || 'https://via.placeholder.com/300x250/cccccc/ffffff?text=No+Image'
     });
   }
 }

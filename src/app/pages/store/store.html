@@ -18,7 +18,7 @@
           <label for="category">Category:</label>
           <select id="category" (change)="onCategoryChange($event)" class="filter-dropdown">
             <option value="">All Categories</option>
-            <option value="living-room">Living Room</option>
+            <option value="livingroom">Living Room</option>
             <option value="bedroom">Bedroom</option>
             <option value="kitchen">Kitchen</option>
             <option value="office">Office</option>
@@ -39,14 +39,14 @@
   <div class="products-grid">
     <div class="product-card" *ngFor="let product of sortedProducts">
       <div class="product-image">
-        <img [src]="product.image" [alt]="product.name">
+        <img [src]="product.image || 'https://via.placeholder.com/300x300/cccccc/ffffff?text=No+Image'" [alt]="product.name">
         <div class="product-overlay">
           <button class="btn-view">Quick View</button>
         </div>
       </div>
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
+        <p class="product-description">{{ product.description || 'No description available' }}</p>
         <div class="product-price">${{ product.price.toFixed(2) }}</div>
         <button class="btn-add-cart" (click)="addToCart(product)">Add to Cart</button>
       </div>
