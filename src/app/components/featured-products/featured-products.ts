@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CartService } from '../../services/cart.service';
 
 interface Product {
   id: number;
@@ -15,6 +16,8 @@ interface Product {
   styleUrl: './featured-products.css',
 })
 export class FeaturedProductsComponent {
+  constructor(private cartService: CartService) {}
+
   products: Product[] = [
     {
       id: 1,
@@ -41,4 +44,13 @@ export class FeaturedProductsComponent {
       image: 'https://via.placeholder.com/300x250/f39c12/ffffff?text=King+Bed'
     }
   ];
+
+  addToCart(product: Product): void {
+    this.cartService.addToCart({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      image: product.image
+    });
+  }
 }

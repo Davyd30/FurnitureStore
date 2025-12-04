@@ -82,7 +82,6 @@
   }
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .hero {
     height: 500px;

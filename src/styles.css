@@ -42,7 +42,6 @@ ul {
   list-style: none;
 }
 
-/* Utility Classes */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -53,13 +52,11 @@ ul {
   text-align: center;
 }
 
-/* Remove default focus outline and add custom one */
 *:focus-visible {
   outline: 2px solid #3498db;
   outline-offset: 2px;
 }
 
-/* Smooth transitions for interactive elements */
 button, a, input, select, textarea {
   transition: all 0.3s ease;
 }

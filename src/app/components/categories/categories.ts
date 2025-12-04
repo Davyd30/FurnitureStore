@@ -21,31 +21,25 @@ export class CategoriesComponent {
       id: 1,
       title: 'Living Room',
       slug: 'living-room',
-      image: 'https://via.placeholder.com/300x200/3498db/ffffff?text=Living+Room'
+      image: 'images/living-room.png'
     },
     {
       id: 2,
       title: 'Bedroom',
       slug: 'bedroom',
-      image: 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Bedroom'
+      image: 'images/bedroom.png'
     },
     {
       id: 3,
       title: 'Kitchen',
       slug: 'kitchen',
-      image: 'https://via.placeholder.com/300x200/2ecc71/ffffff?text=Kitchen'
+      image: 'images/kitchen.png'
     },
     {
       id: 4,
       title: 'Office',
       slug: 'office',
-      image: 'https://via.placeholder.com/300x200/f39c12/ffffff?text=Office'
-    },
-    {
-      id: 5,
-      title: 'Bathroom',
-      slug: 'bathroom',
-      image: 'https://via.placeholder.com/300x200/9b59b6/ffffff?text=Bathroom'
+      image: 'images/office.png'
     }
   ];
 }

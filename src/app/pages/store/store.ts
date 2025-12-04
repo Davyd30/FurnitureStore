@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CartService } from '../../../../services/cart.service';
+import { RouterLink } from '@angular/router';
+import { HeaderComponent } from '../../components/header/header';
+import { FooterComponent } from '../../components/footer/footer';
+import { CartService } from '../../services/cart.service';
 
 interface Product {
   id: number;
@@ -13,16 +15,18 @@ interface Product {
 }
 
 @Component({
-  selector: 'app-category',
-  imports: [CommonModule, RouterLink],
-  templateUrl: './category.html',
-  styleUrl: './category.css',
+  selector: 'app-store',
+  imports: [CommonModule, RouterLink, HeaderComponent, FooterComponent],
+  templateUrl: './store.html',
+  styleUrl: './store.css',
 })
-export class CategoryComponent implements OnInit {
-  categoryName: string = '';
-  products: Product[] = [];
+export class StoreComponent {
+  sortBy: string = '';
+  categoryFilter: string = '';
 
-  private allProducts: Product[] = [
+  constructor(private cartService: CartService) {}
+
+  allProducts: Product[] = [
     {
       id: 1,
       name: 'Modern Sofa',
@@ -153,30 +157,30 @@ export class CategoryComponent implements OnInit {
     }
   ];
 
-  constructor(
-    private route: ActivatedRoute,
-    private cartService: CartService
-  ) {}
+  get sortedProducts(): Product[] {
+    let products = [...this.allProducts];
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const categorySlug = params['category'];
-      this.categoryName = this.formatCategoryName(categorySlug);
-      this.loadProducts(categorySlug);
-    });
+    if (this.categoryFilter) {
+      products = products.filter(product => product.category === this.categoryFilter);
+    }
+
+    if (this.sortBy === 'price-low') {
+      return products.sort((a, b) => a.price - b.price);
+    } else if (this.sortBy === 'price-high') {
+      return products.sort((a, b) => b.price - a.price);
+    }
+
+    return products;
   }
 
-  private formatCategoryName(slug: string): string {
-    return slug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+  onSortChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.sortBy = target.value;
   }
 
-  private loadProducts(categorySlug: string): void {
-    this.products = this.allProducts.filter(
-      product => product.category === categorySlug
-    );
+  onCategoryChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.categoryFilter = target.value;
   }
 
   addToCart(product: Product): void {
