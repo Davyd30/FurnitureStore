@@ -1,0 +1,121 @@
+<!-- Room Configuration Modal -->
+<app-room-config-modal 
+    *ngIf="showConfigModal"
+    (roomConfigured)="onRoomConfigured($event)">
+</app-room-config-modal>
+
+<!-- Furniture Sidebar (only show after configuration) -->
+<app-furniture-sidebar 
+    *ngIf="!showConfigModal"
+    (itemSelected)="onFurnitureItemSelected($event)">
+</app-furniture-sidebar>
+
+<!-- Always Visible Action Buttons -->
+<div *ngIf="!showConfigModal" class="fixed top-4 right-4 z-20 space-y-3 w-56">
+    <button (click)="toggleCameraView()"
+            class="w-full px-4 py-3 bg-gradient-to-br from-indigo-500 to-purple-600 text-white 
+                    border-none rounded-lg text-base font-bold cursor-pointer 
+                    transition-all duration-300 shadow-lg
+                    hover:-translate-y-1 hover:shadow-xl
+                    active:translate-y-0 active:shadow-md">
+        {{ isInsideView ? '📷 Outside View' : '🏠 Inside View' }}
+    </button>
+    
+    <button (click)="viewCart()"
+            class="w-full px-4 py-3 bg-gradient-to-br from-green-500 to-emerald-600 text-white 
+                    border-none rounded-lg text-base font-bold cursor-pointer 
+                    transition-all duration-300 shadow-lg
+                    hover:-translate-y-1 hover:shadow-xl
+                    active:translate-y-0 active:shadow-md">
+        🛒 View Cart
+    </button>
+    
+    <!-- Collapsible Right Panel Toggle Button -->
+    <button 
+        (click)="toggleRightPanel()"
+        class="w-full px-4 py-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg
+               flex items-center justify-center gap-2 hover:bg-white transition-all duration-300
+               border-2 border-gray-200 hover:border-indigo-400 font-semibold text-gray-700">
+        <span class="transition-transform duration-300" 
+              [class.rotate-180]="!isRightPanelCollapsed">
+            ⚙️
+        </span>
+        Settings
+    </button>
+</div>
+
+<!-- Controls Panel - Collapsible (only show after configuration) -->
+<div *ngIf="!showConfigModal" 
+     [class]="isRightPanelCollapsed ? 'fixed top-[220px] right-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 z-10 shadow-lg min-w-[240px] transition-all duration-300 translate-x-[calc(100%+1rem)]' : 'fixed top-[220px] right-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 z-10 shadow-lg min-w-[240px] transition-all duration-300'">
+    
+    <h3 class="m-0 mb-3 text-lg text-gray-800 font-bold border-b pb-2">Dimensions</h3>
+    
+    <div class="space-y-3 mb-4">
+        <div class="flex items-center justify-between text-sm">
+            <label class="font-medium text-gray-700">Width:</label>
+            <input type="number" [(ngModel)]="roomWidth" (input)="updateRoom()" step="0.1" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:border-indigo-500 focus:outline-none" />
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+            <label class="font-medium text-gray-700">Height:</label>
+            <input type="number" [(ngModel)]="roomHeight" (input)="updateRoom()" step="0.1" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:border-indigo-500 focus:outline-none" />
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+            <label class="font-medium text-gray-700">Depth:</label>
+            <input type="number" [(ngModel)]="roomDepth" (input)="updateRoom()" step="0.1" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:border-indigo-500 focus:outline-none" />
+        </div>
+    </div>
+
+    <h3 class="m-0 mb-3 text-lg text-gray-800 font-bold border-b pb-2">Wall Colour</h3>
+    
+    <div class="mb-4">
+        <input type="color" [(ngModel)]="wallColor" (input)="updateWallColor()" 
+                class="w-full h-10 rounded cursor-pointer border-2 border-gray-300" />
+    </div>
+
+    <h3 class="m-0 mb-3 text-lg text-gray-800 font-bold border-b pb-2">Floor Texture</h3>
+    
+    <div class="mb-3">
+        <select [(ngModel)]="floorTexture" (change)="updateFloorTexture()"
+                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer
+                       focus:border-indigo-500 focus:outline-none bg-white">
+            <option value="color">Solid Color</option>
+            <option value="wood">Wood</option>
+            <option value="tile">Tile</option>
+            <option value="concrete">Concrete</option>
+            <option value="carpet">Carpet</option>
+        </select>
+    </div>
+    
+    <div *ngIf="floorTexture === 'color'" class="mb-4">
+        <label class="block text-xs text-gray-600 mb-1">Color:</label>
+        <input type="color" [(ngModel)]="floorColor" (input)="updateFloorColor()" 
+                class="w-full h-10 rounded cursor-pointer border-2 border-gray-300" />
+    </div>
+</div>
+
+<!-- Selected Object Tooltip -->
+<div *ngIf="selectedObject" 
+        class="absolute top-4 left-1/2 -translate-x-1/2 
+            bg-gradient-to-br from-cyan-400 to-blue-600 text-white 
+            px-5 py-3 rounded-xl shadow-lg shadow-blue-500/40 z-[15]
+            animate-slideDown">
+    <div class="flex items-center gap-3">
+        <span class="text-2xl">🪑</span>
+        <div class="flex flex-col gap-1">
+            <strong class="text-base capitalize">{{ selectedObjectDisplayName }}</strong>
+            <div class="flex gap-4 text-[13px] opacity-90">
+                <span class="flex items-center gap-1">🖱️ Drag to move</span>
+                <span class="flex items-center gap-1">🔄 Scroll to rotate ({{ currentRotationDegrees }}°)</span>
+                <span class="flex items-center gap-1">🗑️ Middle click to delete</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3D Renderer Container -->
+<div #rendererContainer class="w-full h-screen block bg-gray-100"></div>

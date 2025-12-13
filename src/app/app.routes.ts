@@ -26,5 +26,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/cart/cart').then(m => m.CartComponent),
   },
+  {
+    path: 'room-planner',
+    loadComponent: () =>
+      import('./features/room-planner/pages/room-planner/room-planner.component').then(m => m.RoomPlannerComponent),
+  },
   { path: '**', redirectTo: '' }
 ];

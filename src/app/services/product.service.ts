@@ -53,6 +53,14 @@ export class ProductService {
     );
   }
 
+  getModelUrl(shopId: string, productId: string): string {
+    return `${this.s3BaseUrl}/${shopId}/${productId}/model.glb`;
+  }
+
+  getImageUrl(shopId: string, productId: string): string {
+    return `${this.s3BaseUrl}/${shopId}/${productId}/main.png`;
+  }
+
   refreshProducts(): void {
     this.loadProducts();
   }

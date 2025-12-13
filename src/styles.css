@@ -1,47 +1,6 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@import "tailwindcss";
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  background-color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.2;
-  font-weight: 600;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-ul {
-  list-style: none;
-}
-
+/* Custom styles for non-room-planner pages */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -50,13 +9,4 @@ ul {
 
 .text-center {
   text-align: center;
-}
-
-*:focus-visible {
-  outline: 2px solid #3498db;
-  outline-offset: 2px;
-}
-
-button, a, input, select, textarea {
-  transition: all 0.3s ease;
 }
