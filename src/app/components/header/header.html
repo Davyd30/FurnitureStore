@@ -1,16 +1,19 @@
 <header class="header">
   <div class="header-container">
     <div class="logo">
-      <a href="#">FurnitureStore</a>
+      <a [routerLink]="shopBaseUrl">
+        <img *ngIf="shop?.logo" [src]="shop?.logo" [alt]="shop?.name" class="logo-img" />
+        <span *ngIf="!shop?.logo">{{ shop?.name || 'FurnitureStore' }}</span>
+      </a>
     </div>
 
     <nav class="nav-desktop">
-      <a routerLink="/" class="nav-link">Home</a>
-      <a routerLink="/store" class="nav-link">Store</a>
-      <a routerLink="/room-planner" class="nav-link">Room Planner</a>
+      <a [routerLink]="shopBaseUrl" class="nav-link">Home</a>
+      <a [routerLink]="shopBaseUrl + '/store'" class="nav-link">Store</a>
+      <a [routerLink]="shopBaseUrl + '/room-planner'" class="nav-link">Room Planner</a>
     </nav>
 
-    <a routerLink="/cart" class="cart-icon">
+    <a [routerLink]="shopBaseUrl + '/cart'" class="cart-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
@@ -27,8 +30,8 @@
   </div>
 
   <nav class="nav-mobile" [class.active]="isMobileMenuOpen">
-    <a routerLink="/" class="nav-link" (click)="closeMobileMenu()">Home</a>
-    <a routerLink="/store" class="nav-link" (click)="closeMobileMenu()">Store</a>
-    <a routerLink="/room-planner" class="nav-link" (click)="closeMobileMenu()">Room Planner</a>
+    <a [routerLink]="shopBaseUrl" class="nav-link" (click)="closeMobileMenu()">Home</a>
+    <a [routerLink]="shopBaseUrl + '/store'" class="nav-link" (click)="closeMobileMenu()">Store</a>
+    <a [routerLink]="shopBaseUrl + '/room-planner'" class="nav-link" (click)="closeMobileMenu()">Room Planner</a>
   </nav>
 </header>

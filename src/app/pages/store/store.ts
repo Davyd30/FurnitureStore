@@ -5,6 +5,7 @@ import { HeaderComponent } from '../../components/header/header';
 import { FooterComponent } from '../../components/footer/footer';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
+import { ShopService } from '../../services/shop.service';
 import { Product } from '../../models/product.interface';
 
 @Component({
@@ -20,12 +21,18 @@ export class StoreComponent implements OnInit {
 
   constructor(
     private cartService: CartService,
-    private productService: ProductService
+    private productService: ProductService,
+    private shopService: ShopService
   ) {}
 
   ngOnInit(): void {
-    this.productService.getProducts().subscribe(products => {
-      this.allProducts = products;
+    // Load products for current shop
+    this.shopService.currentShop$.subscribe(shop => {
+      if (shop) {
+        this.productService.getProductsByShop(shop._id).subscribe(products => {
+          this.allProducts = products;
+        });
+      }
     });
   }
 
@@ -62,5 +69,10 @@ export class StoreComponent implements OnInit {
       price: product.price,
       image: product.image || 'https://via.placeholder.com/300x300/cccccc/ffffff?text=No+Image'
     });
+  }
+
+  // Format price with shop currency
+  formatPrice(price: number): string {
+    return this.productService.formatPrice(price);
   }
 }

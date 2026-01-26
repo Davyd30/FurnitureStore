@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, map } from 'rxjs';
 import { Product } from '../models/product.interface';
+import { ShopService } from './shop.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private http = inject(HttpClient);
+  private shopService = inject(ShopService);
   private apiUrl = 'https://pj300-express.onrender.com/api/v1/products';
   private s3BaseUrl = 'https://pj300-shop-products.s3.eu-west-1.amazonaws.com';
 
@@ -37,6 +39,13 @@ export class ProductService {
     return this.products$;
   }
 
+  // Get products filtered by current shop
+  getProductsByShop(shopId: string): Observable<Product[]> {
+    return this.products$.pipe(
+      map(products => products.filter(product => product.shopId === shopId))
+    );
+  }
+
   getProductsByCategory(category: string): Observable<Product[]> {
     return this.products$.pipe(
       map(products =>
@@ -63,5 +72,23 @@ export class ProductService {
 
   refreshProducts(): void {
     this.loadProducts();
+  }
+
+  // Get currency symbol from currency code
+  private getCurrencySymbol(currency: string): string {
+    const symbols: { [key: string]: string } = {
+      'EUR': '€',
+      'USD': '$',
+      'GBP': '£',
+    };
+    return symbols[currency.toUpperCase()] || currency;
+  }
+
+  // Format price with currency from current shop
+  formatPrice(price: number): string {
+    const shop = this.shopService.getCurrentShop();
+    const currency = shop?.currency || 'EUR';
+    const symbol = this.getCurrencySymbol(currency);
+    return `${symbol}${price.toFixed(2)}`;
   }
 }

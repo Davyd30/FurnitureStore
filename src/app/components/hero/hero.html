@@ -1,8 +1,8 @@
-<section class="hero">
+<section class="hero" [style.background-image]="shop?.heroImage ? 'url(' + shop?.heroImage + ')' : 'none'">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1 class="hero-title">Modern Furniture for Every Home</h1>
-    <p class="hero-subtitle">Quality, style, comfort — delivered to your door.</p>
-    <button class="cta-button">Shop Now</button>
+    <h1 class="hero-title">{{ shop?.title || 'Modern Furniture for Every Home' }}</h1>
+    <p class="hero-subtitle">{{ shop?.slogan || 'Quality, style, comfort — delivered to your door.' }}</p>
+    <button class="cta-button" (click)="navigateToStore()">Shop Now</button>
   </div>
 </section>

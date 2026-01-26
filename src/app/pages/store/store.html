@@ -47,7 +47,7 @@
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="product-description">{{ product.description || 'No description available' }}</p>
-        <div class="product-price">${{ product.price.toFixed(2) }}</div>
+        <div class="product-price">{{ formatPrice(product.price) }}</div>
         <button class="btn-add-cart" (click)="addToCart(product)">Add to Cart</button>
       </div>
     </div>

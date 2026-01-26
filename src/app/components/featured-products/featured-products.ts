@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
+import { ShopService } from '../../services/shop.service';
 import { Product } from '../../models/product.interface';
+import { Shop } from '../../models/shop.interface';
 
 @Component({
   selector: 'app-featured-products',
@@ -12,16 +14,30 @@ import { Product } from '../../models/product.interface';
 })
 export class FeaturedProductsComponent implements OnInit {
   products: Product[] = [];
+  shop: Shop | null = null;
 
   constructor(
     private cartService: CartService,
-    private productService: ProductService
+    private productService: ProductService,
+    private shopService: ShopService
   ) {}
 
   ngOnInit(): void {
-    this.productService.getProducts().subscribe(products => {
-      this.products = products.slice(0, 4);
+    // Get current shop
+    this.shopService.currentShop$.subscribe(shop => {
+      this.shop = shop;
+      if (shop) {
+        // Load products for this shop only
+        this.productService.getProductsByShop(shop._id).subscribe(products => {
+          this.products = products.slice(0, 4);
+        });
+      }
     });
+  }
+
+  // Format price with currency
+  formatPrice(price: number): string {
+    return this.productService.formatPrice(price);
   }
 
   addToCart(product: Product): void {

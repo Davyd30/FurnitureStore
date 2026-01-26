@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header';
 import { FooterComponent } from '../../components/footer/footer';
 import { CartService, CartItem } from '../../services/cart.service';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-cart',
@@ -15,7 +16,10 @@ export class CartComponent implements OnInit {
   cartItems: CartItem[] = [];
   subtotal: number = 0;
 
-  constructor(private cartService: CartService) {}
+  constructor(
+    private cartService: CartService,
+    private productService: ProductService
+  ) {}
 
   ngOnInit(): void {
     this.cartService.cartItems$.subscribe(items => {
@@ -44,5 +48,10 @@ export class CartComponent implements OnInit {
 
   get grandTotal(): number {
     return this.subtotal;
+  }
+
+  // Format price with shop currency
+  formatPrice(price: number): string {
+    return this.productService.formatPrice(price);
   }
 }
