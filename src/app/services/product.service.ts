@@ -13,41 +13,28 @@ export class ProductService {
   private apiUrl = 'https://pj300-express.onrender.com/api/v1/products';
   private s3BaseUrl = 'https://pj300-shop-products.s3.eu-west-1.amazonaws.com';
 
-  private productsSubject = new BehaviorSubject<Product[]>([]);
-  public products$ = this.productsSubject.asObservable();
-
-  constructor() {
-    this.loadProducts();
-  }
-
-  private loadProducts(): void {
-    this.http.get<Product[]>(this.apiUrl).subscribe({
-      next: (products) => {
-        const productsWithImages = products.map(product => ({
-          ...product,
-          image: `${this.s3BaseUrl}/${product.shopId}/${product._id}/main.png`
-        }));
-        this.productsSubject.next(productsWithImages);
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-      }
-    });
-  }
-
+  // Get all products (for backwards compatibility)
   getProducts(): Observable<Product[]> {
-    return this.products$;
-  }
-
-  // Get products filtered by current shop
-  getProductsByShop(shopId: string): Observable<Product[]> {
-    return this.products$.pipe(
-      map(products => products.filter(product => product.shopId === shopId))
+    return this.http.get<Product[]>(this.apiUrl).pipe(
+      map(products => products.map(product => ({
+        ...product,
+        image: `${this.s3BaseUrl}/${product.shopId}/${product._id}/main.png`
+      })))
     );
   }
 
-  getProductsByCategory(category: string): Observable<Product[]> {
-    return this.products$.pipe(
+  // Get products for a specific shop from API
+  getProductsByShop(shopId: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/shop/${shopId}`).pipe(
+      map(products => products.map(product => ({
+        ...product,
+        image: `${this.s3BaseUrl}/${product.shopId}/${product._id}/main.png`
+      })))
+    );
+  }
+
+  getProductsByCategory(category: string, shopId: string): Observable<Product[]> {
+    return this.getProductsByShop(shopId).pipe(
       map(products =>
         products.filter(product =>
           product.category.includes(category)
@@ -56,8 +43,8 @@ export class ProductService {
     );
   }
 
-  getProductById(id: string): Observable<Product | undefined> {
-    return this.products$.pipe(
+  getProductById(id: string, shopId: string): Observable<Product | undefined> {
+    return this.getProductsByShop(shopId).pipe(
       map(products => products.find(product => product._id === id))
     );
   }
@@ -68,10 +55,6 @@ export class ProductService {
 
   getImageUrl(shopId: string, productId: string): string {
     return `${this.s3BaseUrl}/${shopId}/${productId}/main.png`;
-  }
-
-  refreshProducts(): void {
-    this.loadProducts();
   }
 
   // Get currency symbol from currency code
