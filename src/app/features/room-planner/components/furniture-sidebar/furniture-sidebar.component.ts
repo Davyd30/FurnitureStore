@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../../services/product.service';
+import { ShopService } from '../../../../services/shop.service';
 import { Product } from '../../../../models/product.interface';
 
 export interface FurnitureItem {
@@ -33,7 +34,10 @@ export class FurnitureSidebarComponent implements OnInit {
   isCategoryDropdownOpen = false;
   sortBy: 'name' | 'price-low' | 'price-high' = 'name';
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private shopService: ShopService
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -43,32 +47,37 @@ export class FurnitureSidebarComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.productService.getProducts().subscribe({
-      next: (products: Product[]) => {
-        this.furnitureItems = products.map((product: Product) => ({
-          name: product._id,
-          displayName: product.name,
-          path: this.productService.getModelUrl(product.shopId, product._id),
-          imageUrl: this.productService.getImageUrl(product.shopId, product._id),
-          productId: product._id,
-          price: product.price,
-          categories: product.category || []
-        }));
-        
-        // Extract unique categories
-        const categorySet = new Set<string>();
-        this.furnitureItems.forEach(item => {
-          item.categories.forEach(cat => categorySet.add(cat));
+    // Get current shop and load its products
+    this.shopService.currentShop$.subscribe(shop => {
+      if (shop) {
+        this.productService.getProductsByShop(shop._id).subscribe({
+          next: (products: Product[]) => {
+            this.furnitureItems = products.map((product: Product) => ({
+              name: product._id,
+              displayName: product.name,
+              path: this.productService.getModelUrl(product.shopId, product._id),
+              imageUrl: this.productService.getImageUrl(product.shopId, product._id),
+              productId: product._id,
+              price: product.price,
+              categories: product.category || []
+            }));
+            
+            // Extract unique categories
+            const categorySet = new Set<string>();
+            this.furnitureItems.forEach(item => {
+              item.categories.forEach(cat => categorySet.add(cat));
+            });
+            this.categories = Array.from(categorySet).sort();
+            
+            this.filteredItems = [...this.furnitureItems];
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Error loading products:', error);
+            this.errorMessage = 'Failed to load products';
+            this.isLoading = false;
+          }
         });
-        this.categories = Array.from(categorySet).sort();
-        
-        this.filteredItems = [...this.furnitureItems];
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-        this.errorMessage = 'Failed to load products';
-        this.isLoading = false;
       }
     });
   }

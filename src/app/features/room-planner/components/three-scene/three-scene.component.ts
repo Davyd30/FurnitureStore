@@ -9,9 +9,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomConfigModalComponent, RoomConfig } from '../room-config-modal/room-config-modal.component';
 import { FurnitureSidebarComponent, FurnitureItem } from '../furniture-sidebar/furniture-sidebar.component';
+import { CartService } from '../../../../services/cart.service';
+import { ShopService } from '../../../../services/shop.service';
 
 @Component({
   selector: 'app-three-scene',
@@ -62,6 +65,12 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   private dragPlane = new THREE.Plane();
   private dragOffset = new THREE.Vector3();
   private movableObjects: THREE.Object3D[] = [];
+
+  constructor(
+    private cartService: CartService,
+    private router: Router,
+    private shopService: ShopService
+  ) {}
 
   ngAfterViewInit(): void {
     // Don't initialize until room is configured
@@ -595,6 +604,9 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         const obj = gltf.scene;
         obj.name = item.name;
         obj.userData['displayName'] = item.displayName;
+        obj.userData['productId'] = item.productId;
+        obj.userData['price'] = item.price;
+        obj.userData['imageUrl'] = item.imageUrl;
 
         // Enable shadows
         obj.traverse((child) => {
@@ -668,40 +680,28 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   }
 
   viewCart(): void {
-    const cartItems = this.movableObjects.map((obj, index) => {
-      // Convert rotation from radians to degrees
-      const rotationDegrees = Math.round((obj.rotation.y * 180) / Math.PI);
-      
-      return {
-        id: index + 1,
-        name: obj.name,
-        position: {
-          x: Math.round(obj.position.x * 100) / 100,
-          y: Math.round(obj.position.y * 100) / 100,
-          z: Math.round(obj.position.z * 100) / 100
-        },
-        rotation: rotationDegrees
-      };
+    // Add all furniture items from scene to cart
+    this.movableObjects.forEach(obj => {
+      const productId = obj.userData['productId'];
+      const displayName = obj.userData['displayName'] || obj.name;
+      const price = obj.userData['price'] || 0;
+      const imageUrl = obj.userData['imageUrl'] || '';
+
+      if (productId) {
+        this.cartService.addToCart({
+          id: productId,
+          name: displayName,
+          price: price,
+          image: imageUrl
+        });
+      }
     });
 
-    const cartData = {
-      roomDimensions: {
-        width: this.roomWidth,
-        height: this.roomHeight,
-        depth: this.roomDepth
-      },
-      items: cartItems,
-      totalItems: cartItems.length
-    };
-
-    console.log('=== ROOM PLANNER CART ===');
-    console.log(JSON.stringify(cartData, null, 2));
-    console.log('========================');
-    
-    // Also log a summary
-    console.log(`\nCart Summary: ${cartItems.length} item(s) in the scene`);
-    cartItems.forEach(item => {
-      console.log(`  - ${item.name} at position (${item.position.x}, ${item.position.z}), rotation: ${item.rotation}°`);
-    });
+    // Navigate to cart page
+    const shop = this.shopService.getCurrentShop();
+    if (shop) {
+      const shopUrl = this.shopService.titleToUrl(shop.title);
+      this.router.navigate([`/${shopUrl}/cart`]);
+    }
   }
 }
