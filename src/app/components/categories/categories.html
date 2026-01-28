@@ -3,7 +3,7 @@
     <h2 class="section-title">Shop by Category</h2>
     <div class="categories-grid">
       @for (category of categories; track category.id) {
-        <a [routerLink]="['/category', category.slug]" class="category-card">
+        <div class="category-card" (click)="navigateToCategory(category.slug)">
           <div class="category-image">
             <img [src]="category.image" [alt]="category.title">
           </div>
@@ -11,7 +11,7 @@
             <h3 class="category-title">{{ category.title }}</h3>
             <button class="view-more-btn">View More</button>
           </div>
-        </a>
+        </div>
       }
     </div>
   </div>

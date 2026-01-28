@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header';
 import { FooterComponent } from '../../components/footer/footer';
 import { CartService } from '../../services/cart.service';
@@ -22,10 +22,21 @@ export class StoreComponent implements OnInit {
   constructor(
     private cartService: CartService,
     private productService: ProductService,
-    private shopService: ShopService
+    private shopService: ShopService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Scroll to top of page
+    window.scrollTo(0, 0);
+    
+    // Check for category query param
+    this.route.queryParams.subscribe(params => {
+      if (params['category']) {
+        this.categoryFilter = params['category'];
+      }
+    });
+
     // Load products for current shop
     this.shopService.currentShop$.subscribe(shop => {
       if (shop) {
