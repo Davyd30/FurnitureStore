@@ -37,7 +37,7 @@
   </header>
 
   <div class="products-grid">
-    <div class="product-card" *ngFor="let product of sortedProducts">
+    <div class="product-card" *ngFor="let product of sortedProducts" (click)="openProductModal(product)">
       <div class="product-image">
         <img [src]="product.image || 'https://via.placeholder.com/300x300/cccccc/ffffff?text=No+Image'" [alt]="product.name">
         <div class="product-overlay">
@@ -48,10 +48,17 @@
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="product-description">{{ product.description || 'No description available' }}</p>
         <div class="product-price">{{ formatPrice(product.price) }}</div>
-        <button class="btn-add-cart" (click)="addToCart(product)">Add to Cart</button>
+        <button class="btn-add-cart" (click)="addToCart(product); $event.stopPropagation()">Add to Cart</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Product Modal -->
+<app-product-modal 
+  [product]="selectedProduct"
+  (close)="closeProductModal()"
+  (addToCart)="addToCartFromModal($event)">
+</app-product-modal>
 
 <app-footer></app-footer>

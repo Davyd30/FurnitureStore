@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header';
 import { FooterComponent } from '../../components/footer/footer';
+import { ProductModalComponent } from '../../components/product-modal/product-modal';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
 import { ShopService } from '../../services/shop.service';
@@ -10,7 +11,7 @@ import { Product } from '../../models/product.interface';
 
 @Component({
   selector: 'app-store',
-  imports: [CommonModule, RouterLink, HeaderComponent, FooterComponent],
+  imports: [CommonModule, RouterLink, HeaderComponent, FooterComponent, ProductModalComponent],
   templateUrl: './store.html',
   styleUrl: './store.css',
 })
@@ -18,6 +19,7 @@ export class StoreComponent implements OnInit {
   sortBy: string = '';
   categoryFilter: string = '';
   allProducts: Product[] = [];
+  selectedProduct: Product | null = null;
 
   constructor(
     private cartService: CartService,
@@ -85,5 +87,21 @@ export class StoreComponent implements OnInit {
   // Format price with shop currency
   formatPrice(price: number): string {
     return this.productService.formatPrice(price);
+  }
+
+  // Open product modal
+  openProductModal(product: Product): void {
+    this.selectedProduct = product;
+  }
+
+  // Close product modal
+  closeProductModal(): void {
+    this.selectedProduct = null;
+  }
+
+  // Add to cart from modal
+  addToCartFromModal(product: Product): void {
+    this.addToCart(product);
+    this.closeProductModal();
   }
 }
