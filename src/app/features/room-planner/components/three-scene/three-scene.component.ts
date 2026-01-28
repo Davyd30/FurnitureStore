@@ -704,4 +704,13 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
       this.router.navigate([`/${shopUrl}/cart`]);
     }
   }
+
+  returnToStore(): void {
+    // Navigate back to store page
+    const shop = this.shopService.getCurrentShop();
+    if (shop) {
+      const shopUrl = this.shopService.titleToUrl(shop.title);
+      this.router.navigate([`/${shopUrl}/`]);
+    }
+  }
 }

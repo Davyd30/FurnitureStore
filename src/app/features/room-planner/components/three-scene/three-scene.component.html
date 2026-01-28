@@ -98,6 +98,20 @@
     </div>
 </div>
 
+<!-- Return to Store Button - Bottom Right -->
+<div *ngIf="!showConfigModal" class="fixed bottom-4 right-4 z-20">
+    <button (click)="returnToStore()"
+            class="px-6 py-3 bg-gradient-to-br from-gray-600 to-gray-800 text-white 
+                    border-none rounded-lg text-base font-bold cursor-pointer 
+                    transition-all duration-300 shadow-lg
+                    hover:-translate-y-1 hover:shadow-xl
+                    active:translate-y-0 active:shadow-md
+                    flex items-center gap-2">
+        <span>←</span>
+        Back to Store
+    </button>
+</div>
+
 <!-- Selected Object Tooltip -->
 <div *ngIf="selectedObject" 
         class="absolute top-4 left-1/2 -translate-x-1/2 
