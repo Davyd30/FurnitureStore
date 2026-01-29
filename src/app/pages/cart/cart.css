@@ -248,6 +248,7 @@
   font-weight: 600;
   text-align: center;
   text-decoration: none;
+  cursor: pointer;
   margin-top: 1rem;
   transition: background 0.3s, color 0.3s;
 }

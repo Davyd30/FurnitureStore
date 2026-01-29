@@ -4,14 +4,14 @@
     <div class="products-grid">
       @for (product of products; track product._id) {
         <div class="product-card">
-          <div class="product-image">
+          <div class="product-image" (click)="openProductModal(product)">
             <img [src]="product.image || 'https://via.placeholder.com/300x250/cccccc/ffffff?text=No+Image'" [alt]="product.name">
             <div class="product-overlay">
               <button class="quick-view-btn">Quick View</button>
             </div>
           </div>
           <div class="product-info">
-            <h3 class="product-title">{{ product.name }}</h3>
+            <h3 class="product-title" (click)="openProductModal(product)">{{ product.name }}</h3>
             <p class="product-price">{{ formatPrice(product.price) }}</p>
             <button class="add-to-cart-btn" (click)="addToCart(product)">Add to Cart</button>
           </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
@@ -15,6 +15,7 @@ import { Shop } from '../../models/shop.interface';
 export class FeaturedProductsComponent implements OnInit {
   products: Product[] = [];
   shop: Shop | null = null;
+  @Output() productClick = new EventEmitter<Product>();
 
   constructor(
     private cartService: CartService,
@@ -47,5 +48,9 @@ export class FeaturedProductsComponent implements OnInit {
       price: product.price,
       image: product.image || 'https://via.placeholder.com/300x250/cccccc/ffffff?text=No+Image'
     });
+  }
+
+  openProductModal(product: Product): void {
+    this.productClick.emit(product);
   }
 }
