@@ -24,6 +24,7 @@ export interface FurnitureItem {
 })
 export class FurnitureSidebarComponent implements OnInit {
   @Output() itemSelected = new EventEmitter<FurnitureItem>();
+  @Output() sidebarToggled = new EventEmitter<boolean>();
 
   furnitureItems: FurnitureItem[] = [];
   filteredItems: FurnitureItem[] = [];
@@ -33,6 +34,7 @@ export class FurnitureSidebarComponent implements OnInit {
   errorMessage = '';
   isCategoryDropdownOpen = false;
   sortBy: 'name' | 'price-low' | 'price-high' = 'name';
+  isSidebarOpen = true;
 
   constructor(
     private productService: ProductService,
@@ -118,6 +120,11 @@ export class FurnitureSidebarComponent implements OnInit {
 
   toggleCategoryDropdown(): void {
     this.isCategoryDropdownOpen = !this.isCategoryDropdownOpen;
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+    this.sidebarToggled.emit(this.isSidebarOpen);
   }
 
   onItemClick(item: FurnitureItem): void {

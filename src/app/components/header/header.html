@@ -2,8 +2,7 @@
   <div class="header-container">
     <div class="logo">
       <a [routerLink]="shopBaseUrl">
-        <img *ngIf="shop?.logo" [src]="shop?.logo" [alt]="shop?.name" class="logo-img" />
-        <span *ngIf="!shop?.logo">{{ shop?.name || 'FurnitureStore' }}</span>
+        <span class="shop-name">{{ shop?.title || 'FurnitureStore' }}</span>
       </a>
     </div>
 

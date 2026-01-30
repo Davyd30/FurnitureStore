@@ -7,48 +7,44 @@
 <!-- Furniture Sidebar (only show after configuration) -->
 <app-furniture-sidebar 
     *ngIf="!showConfigModal"
-    (itemSelected)="onFurnitureItemSelected($event)">
+    (itemSelected)="onFurnitureItemSelected($event)"
+    (sidebarToggled)="onSidebarToggled($event)">
 </app-furniture-sidebar>
 
 <!-- Always Visible Action Buttons -->
-<div *ngIf="!showConfigModal" class="fixed top-4 right-4 z-20 space-y-3 w-56">
+<div *ngIf="!showConfigModal" class="fixed top-2 sm:top-4 right-2 sm:right-4 z-20 space-y-2 sm:space-y-3">
     <button (click)="toggleCameraView()"
-            class="w-full px-4 py-3 bg-gradient-to-br from-indigo-500 to-purple-600 text-white 
-                    border-none rounded-lg text-base font-bold cursor-pointer 
-                    transition-all duration-300 shadow-lg
-                    hover:-translate-y-1 hover:shadow-xl
-                    active:translate-y-0 active:shadow-md">
-        {{ isInsideView ? '📷 Outside View' : '🏠 Inside View' }}
+            class="action-btn"
+            [class.icon-only-mobile]="isMobileSidebarOpen">
+        <span class="icon-part">{{ isInsideView ? '📷' : '🏠' }}</span>
+        <span class="text-part">{{ isInsideView ? ' Outside View' : ' Inside View' }}</span>
     </button>
     
     <button (click)="viewCart()"
-            class="w-full px-4 py-3 bg-gradient-to-br from-green-500 to-emerald-600 text-white 
-                    border-none rounded-lg text-base font-bold cursor-pointer 
-                    transition-all duration-300 shadow-lg
-                    hover:-translate-y-1 hover:shadow-xl
-                    active:translate-y-0 active:shadow-md">
-        🛒 View Cart
+            class="action-btn cart-btn"
+            [class.icon-only-mobile]="isMobileSidebarOpen">
+        <span class="icon-part">🛒</span>
+        <span class="text-part"> View Cart</span>
     </button>
     
     <!-- Collapsible Right Panel Toggle Button -->
     <button 
         (click)="toggleRightPanel()"
-        class="w-full px-4 py-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg
-               flex items-center justify-center gap-2 hover:bg-white transition-all duration-300
-               border-2 border-gray-200 hover:border-indigo-400 font-semibold text-gray-700">
+        class="action-btn settings-btn"
+        [class.icon-only-mobile]="isMobileSidebarOpen">
         <span class="transition-transform duration-300" 
               [class.rotate-180]="!isRightPanelCollapsed">
             ⚙️
         </span>
-        Settings
+        <span class="text-part">Settings</span>
     </button>
 </div>
 
 <!-- Controls Panel - Collapsible (only show after configuration) -->
 <div *ngIf="!showConfigModal" 
-     [class]="isRightPanelCollapsed ? 'fixed top-[220px] right-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 z-10 shadow-lg min-w-[240px] transition-all duration-300 translate-x-[calc(100%+1rem)]' : 'fixed top-[220px] right-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 z-10 shadow-lg min-w-[240px] transition-all duration-300'">
+     [class]="isRightPanelCollapsed ? 'fixed top-[160px] sm:top-[220px] right-2 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 sm:p-4 z-10 shadow-lg w-[calc(100%-1rem)] sm:w-auto sm:min-w-[240px] transition-all duration-300 translate-x-[calc(100%+1rem)]' : 'fixed top-[160px] sm:top-[220px] right-2 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 sm:p-4 z-10 shadow-lg w-[calc(100%-1rem)] sm:w-auto sm:min-w-[240px] transition-all duration-300'">
     
-    <h3 class="m-0 mb-3 text-lg text-gray-800 font-bold border-b pb-2">Dimensions</h3>
+    <h3 class="m-0 mb-2 sm:mb-3 text-base sm:text-lg text-gray-800 font-bold border-b pb-2">Dimensions</h3>
     
     <div class="space-y-3 mb-4">
         <div class="flex items-center justify-between text-sm">
@@ -99,33 +95,37 @@
 </div>
 
 <!-- Return to Store Button - Bottom Right -->
-<div *ngIf="!showConfigModal" class="fixed bottom-4 right-4 z-20">
+<div *ngIf="!showConfigModal" class="fixed bottom-2 sm:bottom-4 right-2 sm:right-4 z-20">
     <button (click)="returnToStore()"
-            class="px-6 py-3 bg-gradient-to-br from-gray-600 to-gray-800 text-white 
-                    border-none rounded-lg text-base font-bold cursor-pointer 
+            class="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-br from-gray-600 to-gray-800 text-white 
+                    border-none rounded-lg text-sm sm:text-base font-bold cursor-pointer 
                     transition-all duration-300 shadow-lg
                     hover:-translate-y-1 hover:shadow-xl
                     active:translate-y-0 active:shadow-md
                     flex items-center gap-2">
         <span>←</span>
-        Back to Store
+        <span class="hidden sm:inline">Back to Store</span>
+        <span class="sm:hidden">Back</span>
     </button>
 </div>
 
 <!-- Selected Object Tooltip -->
 <div *ngIf="selectedObject" 
-        class="absolute top-4 left-1/2 -translate-x-1/2 
+        class="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 
             bg-gradient-to-br from-cyan-400 to-blue-600 text-white 
-            px-5 py-3 rounded-xl shadow-lg shadow-blue-500/40 z-[15]
-            animate-slideDown">
-    <div class="flex items-center gap-3">
-        <span class="text-2xl">🪑</span>
+            px-3 sm:px-5 py-2 sm:py-3 rounded-xl shadow-lg shadow-blue-500/40 z-[15]
+            animate-slideDown max-w-[calc(100%-1rem)] sm:max-w-none">
+    <div class="flex items-center gap-2 sm:gap-3">
+        <span class="text-xl sm:text-2xl">🪑</span>
         <div class="flex flex-col gap-1">
-            <strong class="text-base capitalize">{{ selectedObjectDisplayName }}</strong>
-            <div class="flex gap-4 text-[13px] opacity-90">
+            <strong class="text-sm sm:text-base capitalize">{{ selectedObjectDisplayName }}</strong>
+            <div class="hidden sm:flex gap-4 text-[13px] opacity-90">
                 <span class="flex items-center gap-1">🖱️ Drag to move</span>
                 <span class="flex items-center gap-1">🔄 Scroll to rotate ({{ currentRotationDegrees }}°)</span>
                 <span class="flex items-center gap-1">🗑️ Middle click to delete</span>
+            </div>
+            <div class="flex sm:hidden flex-col text-[11px] opacity-90">
+                <span>🖱️ Drag | 🔄 {{ currentRotationDegrees }}° | 🗑️ Delete</span>
             </div>
         </div>
     </div>

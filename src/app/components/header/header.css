@@ -26,10 +26,12 @@
   gap: 0.5rem;
 }
 
-.logo-img {
-  height: 40px;
-  width: auto;
-  object-fit: contain;
+.shop-name {
+  font-size: 1.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
 }
 
 .logo a:hover {
@@ -264,7 +266,7 @@
   }
 
   .header-actions {
-    gap: 0.5rem;
+    gap: 1.5rem;
   }
 
   .login-button {
@@ -283,5 +285,25 @@
 
   .user-name {
     display: none;
+  }
+
+  .shop-name {
+    font-size: 1.2rem;
+    max-width: 150px;
+  }
+
+  .logo a {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-name {
+    font-size: 1rem;
+    max-width: 120px;
+  }
+
+  .logo a {
+    font-size: 1rem;
   }
 }

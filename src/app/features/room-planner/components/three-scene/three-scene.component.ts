@@ -31,6 +31,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   showConfigModal = true;
   roomConfigured = false;
   isRightPanelCollapsed = true; // Start collapsed
+  isMobileSidebarOpen = true; // Track mobile sidebar state
 
   // Inputs bound to UI
   roomWidth = 6;
@@ -286,7 +287,6 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         
         window.position.set(wallX, windowHeight, 0);
         window.rotation.y = Math.PI / 2; // Rotate to face inside the room
-        // window.scale.set(0.6, 0.6, 0.6); // Scale down to 60% of original size
         
         this.roomGroup.add(window);
       },
@@ -728,6 +728,10 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
 
   toggleRightPanel(): void {
     this.isRightPanelCollapsed = !this.isRightPanelCollapsed;
+  }
+
+  onSidebarToggled(isOpen: boolean): void {
+    this.isMobileSidebarOpen = isOpen;
   }
 
   viewCart(): void {

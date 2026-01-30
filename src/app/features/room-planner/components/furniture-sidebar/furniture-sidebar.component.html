@@ -1,9 +1,28 @@
-<div class="fixed left-0 top-0 h-screen w-96 bg-white/95 backdrop-blur-sm shadow-2xl z-20 overflow-y-auto">
-    <div class="p-4">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span class="text-2xl">🏠</span>
-            List of products
-        </h2>
+<!-- Toggle Button (Mobile Only) -->
+<button 
+    *ngIf="!isSidebarOpen"
+    (click)="toggleSidebar()"
+    class="fixed left-2 top-2 z-30 lg:hidden
+           bg-indigo-600 text-white p-3 rounded-lg shadow-lg
+           hover:bg-indigo-700 transition-colors">
+    🏠
+</button>
+
+<div class="fixed left-0 top-0 h-screen w-72 sm:w-80 md:w-96 bg-white/95 backdrop-blur-sm shadow-2xl z-20 overflow-y-auto transition-transform duration-300"
+     [class.-translate-x-full]="!isSidebarOpen"
+     [class.lg:translate-x-0]="true">
+    <div class="p-3 sm:p-4">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+                <span class="text-xl sm:text-2xl">🏠</span>
+                List of products
+            </h2>
+            <button 
+                (click)="toggleSidebar()"
+                class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                ✕
+            </button>
+        </div>
         
         <!-- Category Filter & Sort -->
         <div class="mb-4 space-y-2">
@@ -60,8 +79,8 @@
             {{ errorMessage }}
         </div>
 
-        <!-- Products Grid (Two Columns) -->
-        <div class="grid grid-cols-2 gap-2" *ngIf="!isLoading && !errorMessage">
+        <!-- Products Grid (Responsive: 1 column on mobile, 2 on larger) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" *ngIf="!isLoading && !errorMessage">
             <div 
                 *ngFor="let item of filteredItems"
                 draggable="true"
