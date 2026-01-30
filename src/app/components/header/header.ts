@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { ShopService } from '../../services/shop.service';
 import { AuthService } from '../../services/auth.service';
@@ -28,7 +28,8 @@ export class HeaderComponent implements OnInit {
   constructor(
     private cartService: CartService,
     private shopService: ShopService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -89,6 +90,11 @@ export class HeaderComponent implements OnInit {
 
   toggleUserMenu() {
     this.showUserMenu = !this.showUserMenu;
+  }
+
+  goToProfile() {
+    this.showUserMenu = false;
+    this.router.navigate([`${this.shopBaseUrl}/profile`]);
   }
 
   logout() {

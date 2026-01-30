@@ -153,6 +153,25 @@
   margin: 0;
 }
 
+.dropdown-action-button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: none;
+  color: #3498db;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown-action-button:hover {
+  background-color: #e8f4fd;
+}
+
 .logout-button {
   width: 100%;
   padding: 0.75rem 1rem;

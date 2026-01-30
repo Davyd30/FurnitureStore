@@ -49,6 +49,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/room-planner/pages/room-planner/room-planner.component').then(m => m.RoomPlannerComponent),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile/profile').then(m => m.ProfileComponent),
+      },
     ]
   },
   // 404 page for any unmatched routes

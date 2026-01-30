@@ -7,6 +7,7 @@ export interface User {
   phoneNumber: string;
   shopId: string;
   role: string;
+  createdAt?: string;
 }
 
 export interface UserRegistration {

@@ -39,6 +39,13 @@
                 <p class="user-full-name">{{ currentUser.fullName || currentUser.email || 'User' }}</p>
                 <p class="user-email">{{ currentUser.email }}</p>
               </div>
+              <button class="dropdown-action-button" (click)="goToProfile()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                My Profile
+              </button>
               <button class="logout-button" (click)="logout()">Logout</button>
             </div>
           }
