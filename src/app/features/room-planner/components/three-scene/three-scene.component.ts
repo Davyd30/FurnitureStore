@@ -244,6 +244,57 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
 
     // Apply initial floor texture after floor is created
     this.updateFloorTexture();
+
+    // Load door and window on walls
+    this.loadDoor();
+    this.loadWindow();
+  }
+
+  private loadDoor() {
+    const loader = new GLTFLoader();
+    loader.load(
+      'assets/models/door.glb',
+      (gltf) => {
+        const door = gltf.scene;
+        
+
+        const wallZ = this.roomDepth / 2;
+        const floorY = -this.roomHeight / 2; // Floor level
+        
+        door.position.set(0, floorY, wallZ);
+        door.rotation.y = Math.PI; // Rotate to face inside the room
+        door.scale.set(0.6, 0.6, 0.6); // Scale down to 60% of original size
+        
+        this.roomGroup.add(door);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading door model:', error);
+      }
+    );
+  }
+
+  private loadWindow() {
+    const loader = new GLTFLoader();
+    loader.load(
+      'assets/models/window.glb',
+      (gltf) => {
+        const window = gltf.scene;
+        
+        const wallX = -this.roomWidth / 2; // Left wall
+        const windowHeight = -this.roomHeight / 2 + this.roomHeight * 0.3; // 30% up the wall
+        
+        window.position.set(wallX, windowHeight, 0);
+        window.rotation.y = Math.PI / 2; // Rotate to face inside the room
+        // window.scale.set(0.6, 0.6, 0.6); // Scale down to 60% of original size
+        
+        this.roomGroup.add(window);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading window model:', error);
+      }
+    );
   }
 
   updateRoom() {
