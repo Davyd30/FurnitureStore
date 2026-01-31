@@ -647,6 +647,40 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  onRotationSliderChange(event: Event): void {
+    if (!this.selectedObject) return;
+    
+    const target = event.target as HTMLInputElement;
+    const degrees = parseInt(target.value, 10);
+    
+    // Convert degrees to radians and apply rotation
+    this.selectedObject.rotation.y = (degrees * Math.PI) / 180;
+    this.currentRotationDegrees = degrees;
+    
+    // Update selection box
+    if (this.selectionBox) {
+      this.selectionBox.update();
+    }
+  }
+
+  deleteSelectedObject(): void {
+    if (!this.selectedObject) return;
+
+    const object = this.selectedObject;
+
+    // Remove from movable objects array
+    const index = this.movableObjects.indexOf(object);
+    if (index > -1) {
+      this.movableObjects.splice(index, 1);
+    }
+
+    // Deselect first
+    this.deselectObject();
+
+    // Remove from scene
+    this.roomGroup.remove(object);
+  }
+
   onFurnitureItemSelected(item: FurnitureItem, dropPosition?: THREE.Vector3): void {
     const loader = new GLTFLoader();
     loader.load(
