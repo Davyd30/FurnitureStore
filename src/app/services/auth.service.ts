@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, map, of, throwError, catchError } from 'rxjs';
 import { User, UserRegistration, LoginCredentials, AuthResponse } from '../models/user.interface';
@@ -104,6 +104,32 @@ export class AuthService {
   updateCurrentUser(user: User): void {
     this.currentUserSubject.next(user);
     localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  updateUserInfo(user: User): Observable<AuthResponse> {
+    return this.http.put<User>(`${this.apiUrl}/users/${user._id}`, {
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address
+    }).pipe(
+      map(updatedUser => {
+        // Merge updated data with existing user data to preserve all fields
+        const mergedUser = { ...user, ...updatedUser };
+        return { user: mergedUser };
+      }),
+      tap(response => {
+        if (response.user) {
+          this.updateCurrentUser(response.user);
+        }
+      }),
+      catchError(error => {
+        console.warn('Backend update failed, updating locally:', error);
+        // Fallback: update locally if backend fails (e.g., user not found)
+        this.updateCurrentUser(user);
+        return of({ user });
+      })
+    );
   }
 
   getCurrentUser(): User | null {

@@ -45,6 +45,11 @@ export const routes: Routes = [
           import('./pages/cart/cart').then(m => m.CartComponent),
       },
       {
+        path: 'checkout',
+        loadComponent: () =>
+          import('./pages/checkout/checkout').then(m => m.CheckoutComponent),
+      },
+      {
         path: 'room-planner',
         loadComponent: () =>
           import('./features/room-planner/pages/room-planner/room-planner.component').then(m => m.RoomPlannerComponent),

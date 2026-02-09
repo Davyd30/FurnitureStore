@@ -1,0 +1,148 @@
+<app-header></app-header>
+
+<div class="min-h-screen bg-gray-50 pb-12">
+  <!-- Breadcrumb -->
+  <nav class="max-w-7xl mx-auto px-4 sm:px-8 py-6 flex items-center gap-2 text-sm">
+    <a routerLink="/" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+    <span class="text-gray-400">/</span>
+    <a [routerLink]="shopBaseUrl + '/cart'" class="text-gray-600 hover:text-gray-900 transition-colors">Cart</a>
+    <span class="text-gray-400">/</span>
+    <span class="text-gray-900 font-medium">Checkout</span>
+  </nav>
+
+  <header class="max-w-7xl mx-auto px-4 sm:px-8 pb-8 text-center">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
+    <p class="text-gray-600 text-lg">Complete your order information</p>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
+    <!-- Left: User Information Form -->
+    <div class="bg-white rounded-xl p-6 sm:p-8 shadow-sm">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Shipping Information</h2>
+      
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3 text-blue-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+        </svg>
+        <span>{{ successMessage }}</span>
+      </div>
+      
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <form class="flex flex-col gap-6" (ngSubmit)="processCheckout()">
+        <!-- Full Name -->
+        <div class="flex flex-col gap-2">
+          <label for="fullName" class="font-medium text-gray-900 text-sm">
+            Full Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="fullName"
+            name="fullName"
+            [(ngModel)]="fullName"
+            placeholder="Enter your full name"
+            class="px-3 py-2.5 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-gray-900 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+            required
+            [disabled]="isSubmitting"
+          />
+        </div>
+
+        <!-- Phone Number -->
+        <div class="flex flex-col gap-2">
+          <label for="phoneNumber" class="font-medium text-gray-900 text-sm">
+            Phone Number <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            id="phoneNumber"
+            name="phoneNumber"
+            [(ngModel)]="phoneNumber"
+            placeholder="Enter your phone number"
+            class="px-3 py-2.5 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-gray-900 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+            required
+            [disabled]="isSubmitting"
+          />
+        </div>
+
+        <!-- Address -->
+        <div class="flex flex-col gap-2">
+          <label for="address" class="font-medium text-gray-900 text-sm">
+            Shipping Address <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="address"
+            name="address"
+            [(ngModel)]="address"
+            placeholder="Enter your complete shipping address"
+            rows="4"
+            class="px-3 py-2.5 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-gray-900 transition-colors resize-y min-h-[100px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+            required
+            [disabled]="isSubmitting"
+          ></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-4 mt-4 flex-col sm:flex-row">
+          <button
+            type="button"
+            (click)="backToCart()"
+            class="flex-1 px-4 py-3 bg-white text-gray-900 border-2 border-gray-900 rounded-lg font-semibold text-base hover:bg-gray-100 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="isSubmitting"
+          >
+            Back to Cart
+          </button>
+          <button
+            type="submit"
+            class="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg font-semibold text-base hover:bg-black hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            [disabled]="isSubmitting"
+          >
+            <span *ngIf="!isSubmitting">Proceed to Payment</span>
+            <span *ngIf="isSubmitting">Processing...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right: Order Summary -->
+    <div class="bg-white rounded-xl p-6 sm:p-8 shadow-sm sticky top-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Order Summary</h2>
+      
+      <div class="flex flex-col gap-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
+        <div *ngFor="let item of cartItems" class="flex gap-4 p-3 border border-gray-200 rounded-lg">
+          <div class="w-[60px] h-[60px] flex-shrink-0">
+            <img [src]="item.image" [alt]="item.name" class="w-full h-full object-cover rounded">
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-medium text-gray-900 mb-1 truncate">{{ item.name }}</h4>
+            <p class="text-xs text-gray-600">Qty: {{ item.quantity }}</p>
+          </div>
+          <div class="font-semibold text-gray-900 whitespace-nowrap">
+            {{ formatPrice(item.price * item.quantity) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t-2 border-gray-200 pt-4 flex flex-col gap-3">
+        <div class="flex justify-between text-base text-gray-600">
+          <span>Subtotal:</span>
+          <span>{{ formatPrice(subtotal) }}</span>
+        </div>
+        <div class="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-200">
+          <span>Total:</span>
+          <span>{{ formatPrice(grandTotal) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>
