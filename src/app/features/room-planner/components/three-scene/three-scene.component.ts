@@ -439,6 +439,10 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     canvas.addEventListener('mouseup', this.onMouseUp);
     canvas.addEventListener('wheel', this.onWheel, { passive: false });
     canvas.addEventListener('auxclick', this.onMiddleClick);
+    // Add touch event listeners for mobile
+    canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
+    canvas.addEventListener('touchend', this.onTouchEnd);
     canvas.style.cursor = 'default';
   }
 
@@ -449,6 +453,10 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     canvas.removeEventListener('mouseup', this.onMouseUp);
     canvas.removeEventListener('wheel', this.onWheel);
     canvas.removeEventListener('auxclick', this.onMiddleClick);
+    // Remove touch event listeners
+    canvas.removeEventListener('touchstart', this.onTouchStart);
+    canvas.removeEventListener('touchmove', this.onTouchMove);
+    canvas.removeEventListener('touchend', this.onTouchEnd);
   }
 
   private onMouseDown = (event: MouseEvent) => {
@@ -553,6 +561,103 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }
+
+  // Touch event handlers for mobile
+  private onTouchStart = (event: TouchEvent) => {
+    if (event.touches.length !== 1) return; // Only handle single touch
+    
+    event.preventDefault();
+    const touch = event.touches[0];
+    
+    // Update mouse position from touch
+    const canvas = this.renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+    this.mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const intersects = this.raycaster.intersectObjects(this.movableObjects, true);
+
+    if (intersects.length > 0) {
+      // Find the top-level movable object
+      let object = intersects[0].object;
+      while (object.parent && !this.movableObjects.includes(object)) {
+        object = object.parent;
+      }
+
+      if (this.movableObjects.includes(object)) {
+        this.controls.enabled = false; // Disable orbit controls while dragging
+        this.controls.enableZoom = false; // Disable zoom when object is selected
+        this.isDragging = true;
+        this.selectedObject = object;
+        this.selectedObjectDisplayName = object.userData['displayName'] || object.name;
+
+        // Create selection box
+        this.createSelectionBox(object);
+
+        // Set up drag plane at floor level
+        const planeY = object.position.y;
+        this.dragPlane.setFromNormalAndCoplanarPoint(
+          new THREE.Vector3(0, 1, 0),
+          new THREE.Vector3(0, planeY, 0)
+        );
+
+        // Calculate offset from touch point to object center
+        const intersectPoint = new THREE.Vector3();
+        this.raycaster.ray.intersectPlane(this.dragPlane, intersectPoint);
+        if (intersectPoint) {
+          this.dragOffset.subVectors(object.position, intersectPoint);
+          this.updateRotationDisplay();
+        }
+      }
+    } else {
+      // Touched on empty space - deselect
+      this.deselectObject();
+    }
+  };
+
+  private onTouchMove = (event: TouchEvent) => {
+    if (event.touches.length !== 1) return; // Only handle single touch
+    
+    const touch = event.touches[0];
+    
+    // Update mouse position from touch
+    const canvas = this.renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+    this.mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+    if (this.isDragging && this.selectedObject) {
+      event.preventDefault(); // Prevent scrolling/panning while dragging
+      
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const intersectPoint = new THREE.Vector3();
+
+      if (this.raycaster.ray.intersectPlane(this.dragPlane, intersectPoint)) {
+        // Calculate new position with offset
+        const newPosition = intersectPoint.add(this.dragOffset);
+        
+        // Apply the new position
+        this.selectedObject.position.x = newPosition.x;
+        this.selectedObject.position.z = newPosition.z;
+
+        // Constrain object to stay within room bounds
+        this.constrainObjectToRoom();
+
+        // Update selection box
+        if (this.selectionBox) {
+          this.selectionBox.update();
+        }
+      }
+    }
+  };
+
+  private onTouchEnd = (event: TouchEvent) => {
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.controls.enabled = true;
+    }
+  };
 
   private createSelectionBox(object: THREE.Object3D) {
     // Remove previous selection box
