@@ -8,6 +8,7 @@ import { CartService, CartItem } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
 import { ShopService } from '../../services/shop.service';
+import { StripeService } from '../../services/stripe.service';
 import { User } from '../../models/user.interface';
 
 @Component({
@@ -32,14 +33,12 @@ export class CheckoutComponent implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
 
-  // Stripe payment link
-  private stripePaymentUrl = 'https://buy.stripe.com/test_bJe00k0en7PLdXOcDRbII00';
-
   constructor(
     private cartService: CartService,
     private productService: ProductService,
     private authService: AuthService,
     private shopService: ShopService,
+    private stripeService: StripeService,
     private router: Router
   ) {}
 
@@ -142,14 +141,28 @@ export class CheckoutComponent implements OnInit {
         this.currentUser = response.user;
         this.successMessage = 'Redirecting to payment...';
         
-        // Redirect to Stripe payment after a short delay
-        setTimeout(() => {
-          window.location.href = this.stripePaymentUrl;
-        }, 1500);
+        try {
+          this.stripeService.checkout({
+            items: this.cartItems,
+            user: this.currentUser
+          }).then(() => {
+            // Success - redirect
+          }).catch((error: any) => {
+            this.isSubmitting = false;
+            this.successMessage = '';
+            this.errorMessage = error.message || 'Payment failed. Please try again.';
+            console.error('Payment error:', error);
+          });
+        } catch (error: any) {
+          this.isSubmitting = false;
+          this.successMessage = '';
+          this.errorMessage = error.message || 'Payment failed. Please try again.';
+          console.error('Payment error:', error);
+        }
       },
       error: (error: any) => {
         this.isSubmitting = false;
-        this.errorMessage = error.message || 'Failed to save checkout information. Please try again.';
+        this.errorMessage = error.message || 'Failed to save checkout information.';
         console.error('Checkout error:', error);
       }
     });
