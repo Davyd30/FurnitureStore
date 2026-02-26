@@ -132,6 +132,57 @@ export class AuthService {
     );
   }
 
+  clearSavedRoom(): Observable<void> {
+    const user = this.currentUserSubject.value;
+    if (!user) return of(undefined);
+
+    return this.http.put<User>(`${this.apiUrl}/users/${user._id}`, {
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      savedRoom: null
+    }).pipe(
+      tap(() => {
+        const updated: User = { ...user, savedRoom: null };
+        this.updateCurrentUser(updated);
+      }),
+      map(() => undefined),
+      catchError(error => {
+        console.warn('Failed to clear room on backend:', error);
+        const updated: User = { ...user, savedRoom: null };
+        this.updateCurrentUser(updated);
+        return of(undefined);
+      })
+    );
+  }
+
+  saveRoom(roomData: string): Observable<void> {
+    const user = this.currentUserSubject.value;
+    if (!user) return of(undefined);
+
+    return this.http.put<User>(`${this.apiUrl}/users/${user._id}`, {
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      savedRoom: roomData
+    }).pipe(
+      tap(() => {
+        const updated: User = { ...user, savedRoom: roomData };
+        this.updateCurrentUser(updated);
+      }),
+      map(() => undefined),
+      catchError(error => {
+        console.warn('Failed to save room to backend:', error);
+        // update locally
+        const updated: User = { ...user, savedRoom: roomData };
+        this.updateCurrentUser(updated);
+        return of(undefined);
+      })
+    );
+  }
+
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }

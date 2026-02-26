@@ -11,10 +11,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 import { RoomConfigModalComponent, RoomConfig } from '../room-config-modal/room-config-modal.component';
 import { FurnitureSidebarComponent, FurnitureItem } from '../furniture-sidebar/furniture-sidebar.component';
 import { CartService } from '../../../../services/cart.service';
 import { ShopService } from '../../../../services/shop.service';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-three-scene',
@@ -66,18 +68,24 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   private dragPlane = new THREE.Plane();
   private dragOffset = new THREE.Vector3();
   private movableObjects: THREE.Object3D[] = [];
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private cartService: CartService,
     private router: Router,
-    private shopService: ShopService
+    private shopService: ShopService,
+    private authService: AuthService
   ) {}
 
   ngAfterViewInit(): void {
-    // Don't initialize until room is configured
-    if (this.roomConfigured) {
-      this.initializeScene();
+    const user = this.authService.getCurrentUser();
+    if (user?.savedRoom) {
+      // Saved room exists, skip config modal and restore
+      this.showConfigModal = false;
+      this.roomConfigured = true;
+      this.loadFromSavedRoom(user.savedRoom);
     }
+    // else: showConfigModal
   }
 
   onRoomConfigured(config: RoomConfig): void {
@@ -95,6 +103,18 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     
     // Initialize the 3D scene
     this.initializeScene();
+
+    // Spawn default heater in the centre of the room
+    setTimeout(() => {
+      this.loadPlyWithRotation(
+        'assets/models/Heater.ply',
+        'Heater',
+        new THREE.Vector3(0, -this.roomHeight / 2, 0),
+        0
+      );
+    }, 100);
+
+    this.triggerSave();
   }
 
   private initializeScene(): void {
@@ -161,6 +181,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.saveTimer) clearTimeout(this.saveTimer);
     window.removeEventListener('resize', this.onWindowResize);
     document.body.removeEventListener('dragover', this.handleDragOver);
     document.body.removeEventListener('drop', this.handleDrop);
@@ -301,6 +322,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     // Clear all furniture objects before rebuilding room
     this.clearAllFurniture();
     this.buildRoom();
+    this.triggerSave();
   }
 
   private clearAllFurniture() {
@@ -332,10 +354,12 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
 
   updateWallColor() {
     this.wallMaterial.color.set(this.wallColor);
+    this.triggerSave();
   }
 
   updateFloorColor() {
     this.floorMaterial.color.set(this.floorColor);
+    this.triggerSave();
   }
 
   updateFloorTexture() {
@@ -349,6 +373,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
       // Solid color - no texture
       this.floorMaterial.color.set(this.floorColor);
       this.floorMaterial.needsUpdate = true;
+      this.triggerSave();
     } else {
       // Load texture image from assets
       const texturePath = `assets/textures/${this.floorTexture}.jpg`;
@@ -365,6 +390,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
           this.floorMaterial.map = texture;
           this.floorMaterial.color.set(0xffffff); // Reset to white to show texture properly
           this.floorMaterial.needsUpdate = true;
+          this.triggerSave();
         },
         undefined,
         (error) => {
@@ -546,6 +572,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     if (this.isDragging) {
       this.isDragging = false;
       this.controls.enabled = true;
+      this.triggerSave();
 
       if (this.selectedObject) {
         this.renderer.domElement.style.cursor = 'grab';
@@ -738,6 +765,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
 
           // Remove from scene
           this.roomGroup.remove(object);
+          this.triggerSave();
         }
       }
     }
@@ -766,6 +794,8 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     if (this.selectionBox) {
       this.selectionBox.update();
     }
+
+    this.triggerSave();
   }
 
   deleteSelectedObject(): void {
@@ -784,6 +814,8 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
 
     // Remove from scene
     this.roomGroup.remove(object);
+
+    this.triggerSave();
   }
 
   onFurnitureItemSelected(item: FurnitureItem, dropPosition?: THREE.Vector3): void {
@@ -797,6 +829,8 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         obj.userData['productId'] = item.productId;
         obj.userData['price'] = item.price;
         obj.userData['imageUrl'] = item.imageUrl;
+        obj.userData['path'] = item.path;
+        obj.userData['categories'] = item.categories;
 
         // Enable shadows
         obj.traverse((child) => {
@@ -828,10 +862,193 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         this.selectedObject = obj;
         this.constrainObjectToRoom();
         this.selectedObject = prevSelected;
+
+        this.triggerSave();
       },
       undefined,
       (err) => console.error(`Error loading ${item.displayName}:`, err)
     );
+  }
+
+  private loadFurnitureWithRotation(item: FurnitureItem, position: THREE.Vector3, rotationY: number): void {
+    const loader = new GLTFLoader();
+    loader.load(
+      item.path,
+      (gltf: GLTF) => {
+        const obj = gltf.scene;
+        obj.name = item.name;
+        obj.userData['displayName'] = item.displayName;
+        obj.userData['productId'] = item.productId;
+        obj.userData['price'] = item.price;
+        obj.userData['imageUrl'] = item.imageUrl;
+        obj.userData['path'] = item.path;
+        obj.userData['categories'] = item.categories;
+
+        obj.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+          }
+        });
+
+        obj.position.set(position.x, position.y, position.z);
+        obj.rotation.y = rotationY;
+
+        this.roomGroup.add(obj);
+        this.movableObjects.push(obj);
+      },
+      undefined,
+      (err) => console.error(`Error loading saved furniture ${item.displayName}:`, err)
+    );
+  }
+
+  private loadPlyWithRotation(plyPath: string, displayName: string, position: THREE.Vector3, rotationY: number): void {
+    const loader = new PLYLoader();
+    loader.load(
+      plyPath,
+      (geometry) => {
+        geometry.computeVertexNormals();
+        const material = new THREE.MeshStandardMaterial(
+          geometry.hasAttribute('color')
+            ? { vertexColors: true }
+            : { color: 0xaaaaaa }
+        );
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        // Wrap in a Group so the API matches GLTF/OBJ objects
+        const obj = new THREE.Group();
+        obj.add(mesh);
+
+        obj.name = 'heater-default';
+        obj.userData['displayName'] = displayName;
+        obj.userData['loaderType'] = 'ply';
+        obj.userData['path'] = plyPath;
+        obj.userData['productId'] = '';
+        obj.userData['price'] = 0;
+        obj.userData['imageUrl'] = '';
+        obj.userData['categories'] = [];
+
+        obj.position.set(position.x, position.y, position.z);
+        obj.rotation.y = rotationY;
+        // obj.scale.set(0.005, 0.005, 0.005);
+
+        this.roomGroup.add(obj);
+        this.movableObjects.push(obj);
+
+        this.triggerSave();
+      },
+      undefined,
+      (err) => console.error(`Error loading PLY ${plyPath}:`, err)
+    );
+  }
+
+  clearRoom(): void {
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+
+    // Clear saved room on backend
+    this.authService.clearSavedRoom().subscribe();
+
+    // Stop rendering and tear down Three.js
+    this.stopRenderingLoop();
+    document.body.removeEventListener('dragover', this.handleDragOver);
+    document.body.removeEventListener('drop', this.handleDrop);
+    this.removeMouseEvents();
+    window.removeEventListener('resize', this.onWindowResize);
+    this.controls.dispose();
+    this.renderer.dispose();
+
+    // Remove canvas from DOM
+    const container = this.containerRef.nativeElement;
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    // Reset state
+    this.movableObjects = [];
+    this.selectedObject = null;
+    this.selectionBox = null;
+    this.roomConfigured = false;
+    this.showConfigModal = true;
+  }
+
+  private loadFromSavedRoom(savedData: string): void {
+    try {
+      const data = JSON.parse(savedData);
+
+      this.roomWidth = data.width ?? this.roomWidth;
+      this.roomHeight = data.height ?? this.roomHeight;
+      this.roomDepth = data.depth ?? this.roomDepth;
+      this.wallColor = data.wallColor ?? this.wallColor;
+      this.floorTexture = data.floorTexture ?? this.floorTexture;
+      this.floorColor = data.floorColor ?? this.floorColor;
+
+      this.initializeScene();
+
+      // Load furniture after scene is ready
+      setTimeout(() => {
+        if (Array.isArray(data.objects)) {
+          data.objects.forEach((obj: any) => {
+            const position = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+            if (obj.loaderType === 'ply') {
+              this.loadPlyWithRotation(obj.path, obj.displayName || 'Object', position, obj.rotationY ?? 0);
+            } else {
+              const item: FurnitureItem = {
+                name: obj.name,
+                displayName: obj.displayName,
+                path: obj.path,
+                productId: obj.productId,
+                price: obj.price,
+                imageUrl: obj.imageUrl,
+                categories: obj.categories || []
+              };
+              this.loadFurnitureWithRotation(item, position, obj.rotationY ?? 0);
+            }
+          });
+        }
+      }, 100);
+    } catch (e) {
+      console.error('Failed to load saved room, falling back to config modal:', e);
+      this.showConfigModal = true;
+      this.roomConfigured = false;
+    }
+  }
+
+  serializeRoom(): string {
+    const objects = this.movableObjects.map(obj => ({
+      name: obj.name,
+      displayName: obj.userData['displayName'] || '',
+      path: obj.userData['path'] || '',
+      loaderType: obj.userData['loaderType'] || 'gltf',
+      productId: obj.userData['productId'] || '',
+      price: obj.userData['price'] || 0,
+      imageUrl: obj.userData['imageUrl'] || '',
+      categories: obj.userData['categories'] || [],
+      position: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
+      rotationY: obj.rotation.y
+    }));
+
+    return JSON.stringify({
+      width: this.roomWidth,
+      height: this.roomHeight,
+      depth: this.roomDepth,
+      wallColor: this.wallColor,
+      floorTexture: this.floorTexture,
+      floorColor: this.floorColor,
+      objects
+    });
+  }
+
+  triggerSave(): void {
+    if (!this.roomConfigured) return;
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => this.persistRoom(), 1500);
+  }
+
+  private persistRoom(): void {
+    if (!this.roomConfigured) return;
+    const data = this.serializeRoom();
+    this.authService.saveRoom(data).subscribe();
   }
 
   private constrainObjectToRoom() {

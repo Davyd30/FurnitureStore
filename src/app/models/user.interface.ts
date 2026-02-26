@@ -8,6 +8,7 @@ export interface User {
   shopId: string;
   role: string;
   createdAt?: string;
+  savedRoom?: string | null;
 }
 
 export interface UserRegistration {

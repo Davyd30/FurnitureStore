@@ -38,6 +38,13 @@
         </span>
         <span class="text-part">Settings</span>
     </button>
+    <button (click)="clearRoom()"
+            class="action-btn"
+            style="background: linear-gradient(135deg,#ef4444,#b91c1c);"
+            [class.icon-only-mobile]="isMobileSidebarOpen">
+        <span class="icon-part">🗑️</span>
+        <span class="text-part"> Clear Room</span>
+    </button>
 </div>
 
 <!-- Controls Panel - Collapsible (only show after configuration) -->
