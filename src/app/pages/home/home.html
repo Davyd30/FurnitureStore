@@ -1,0 +1,12 @@
+<app-header></app-header>
+<app-hero></app-hero>
+<app-categories></app-categories>
+<app-featured-products (productClick)="openProductModal($event)"></app-featured-products>
+<app-footer></app-footer>
+
+@if (showProductModal && selectedProduct) {
+  <app-product-modal 
+    [product]="selectedProduct" 
+    (close)="closeProductModal()">
+  </app-product-modal>
+}

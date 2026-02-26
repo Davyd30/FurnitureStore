@@ -1,0 +1,112 @@
+<div class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 p-4 sm:p-8">
+  <!-- Header -->
+  <div class="max-w-4xl mx-auto mb-6 sm:mb-8 flex items-center gap-4">
+    <button class="flex items-center gap-2 bg-white/20 backdrop-blur-lg border border-white/30 text-white px-4 py-2 rounded-lg font-medium transition-all hover:bg-white/30 hover:-translate-x-1" (click)="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <h1 class="text-white text-2xl sm:text-3xl font-bold">My Profile</h1>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="max-w-4xl mx-auto flex flex-col gap-6" *ngIf="currentUser">
+    <!-- Profile Avatar Section -->
+    <div class="bg-white rounded-2xl p-6 sm:p-8 text-center shadow-xl">
+      <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ currentUser.fullName || 'User' }}</h2>
+      <p class="text-gray-500 capitalize">{{ currentUser.role }}</p>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-xl">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b-2 border-gray-100">
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Profile Information</h3>
+        <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold transition-all hover:bg-indigo-700 hover:-translate-y-0.5" (click)="toggleEdit()">
+          {{ isEditing ? 'Cancel' : 'Edit' }}
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Full Name -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-gray-600 text-sm uppercase tracking-wide">Full Name</label>
+          <input 
+            *ngIf="isEditing" 
+            type="text" 
+            [(ngModel)]="editForm.fullName"
+            class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-indigo-500"
+            placeholder="Enter your full name"
+          />
+          <p *ngIf="!isEditing" class="text-gray-800 px-4 py-3 bg-gray-50 rounded-lg">{{ currentUser.fullName || 'Not provided' }}</p>
+        </div>
+
+        <!-- Email -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-gray-600 text-sm uppercase tracking-wide">Email</label>
+          <input 
+            *ngIf="isEditing" 
+            type="email" 
+            [(ngModel)]="editForm.email"
+            class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-indigo-500"
+            placeholder="Enter your email"
+          />
+          <p *ngIf="!isEditing" class="text-gray-800 px-4 py-3 bg-gray-50 rounded-lg">{{ currentUser.email }}</p>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-gray-600 text-sm uppercase tracking-wide">Phone Number</label>
+          <input 
+            *ngIf="isEditing" 
+            type="tel" 
+            [(ngModel)]="editForm.phoneNumber"
+            class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-indigo-500"
+            placeholder="Enter your phone number"
+          />
+          <p *ngIf="!isEditing" class="text-gray-800 px-4 py-3 bg-gray-50 rounded-lg">{{ currentUser.phoneNumber || 'Not provided' }}</p>
+        </div>
+
+        <!-- Address -->
+        <div class="flex flex-col gap-2 md:col-span-2">
+          <label class="font-semibold text-gray-600 text-sm uppercase tracking-wide">Address</label>
+          <textarea 
+            *ngIf="isEditing" 
+            [(ngModel)]="editForm.address"
+            class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-indigo-500 resize-vertical min-h-[80px]"
+            rows="3"
+            placeholder="Enter your address"
+          ></textarea>
+          <p *ngIf="!isEditing" class="text-gray-800 px-4 py-3 bg-gray-50 rounded-lg">{{ currentUser.address || 'Not provided' }}</p>
+        </div>
+      </div>
+
+      <!-- Save Button (only show when editing) -->
+      <button 
+        *ngIf="isEditing" 
+        class="w-full mt-6 px-4 py-3 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-lg text-base font-bold transition-all hover:-translate-y-1 hover:shadow-lg"
+        (click)="saveProfile()">
+        Save Changes
+      </button>
+    </div>
+
+    <!-- Account Details -->
+    <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-xl">
+      <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 pb-4 border-b-2 border-gray-100">Account Details</h3>
+      <div class="flex justify-between items-center py-4 border-b border-gray-100">
+        <span class="font-semibold text-gray-600">Account Created:</span>
+        <span class="text-gray-800 font-mono bg-gray-50 px-3 py-1 rounded">{{ currentUser.createdAt | date:'medium' }}</span>
+      </div>
+      <div class="flex justify-between items-center py-4">
+        <span class="font-semibold text-gray-600">User ID:</span>
+        <span class="text-gray-800 font-mono bg-gray-50 px-3 py-1 rounded text-sm break-all">{{ currentUser._id }}</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<section class="categories">
+  <div class="container">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories-grid">
+      @for (category of categories; track category.id) {
+        <div class="category-card" (click)="navigateToCategory(category.slug)">
+          <div class="category-image">
+            <img [src]="category.image" [alt]="category.title">
+          </div>
+          <div class="category-content">
+            <h3 class="category-title">{{ category.title }}</h3>
+            <button class="view-more-btn">View More</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,59 @@
+<app-header></app-header>
+
+<div class="cart-page">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a routerLink="/">Home</a>
+    <span class="separator">/</span>
+    <span class="current">Cart</span>
+  </nav>
+
+  <header class="page-header">
+    <h1>Shopping Cart</h1>
+    <p class="cart-count">{{ cartItems.length }} items in your cart</p>
+  </header>
+
+  <div class="empty-cart" *ngIf="cartItems.length === 0">
+    <p>Your cart is empty</p>
+    <button class="btn-continue-shopping" (click)="continueShopping()">Continue Shopping</button>
+  </div>
+
+  <div class="cart-content" *ngIf="cartItems.length > 0">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <div class="item-image">
+          <img [src]="item.image" [alt]="item.name">
+        </div>
+        <div class="item-details">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <p class="item-price">{{ formatPrice(item.price) }}</p>
+        </div>
+        <div class="item-quantity">
+          <button class="qty-btn" (click)="decreaseQuantity(item.id)">-</button>
+          <span class="qty-value">{{ item.quantity }}</span>
+          <button class="qty-btn" (click)="increaseQuantity(item.id)">+</button>
+        </div>
+        <div class="item-total">
+          <p class="total-price">{{ formatPrice(item.price * item.quantity) }}</p>
+        </div>
+        <button class="btn-remove" (click)="removeItem(item.id)">Remove</button>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <h2>Order Summary</h2>
+      <div class="summary-row">
+        <span>Subtotal:</span>
+        <span>{{ formatPrice(subtotal) }}</span>
+      </div>
+      <div class="summary-row total">
+        <span>Grand Total:</span>
+        <span>{{ formatPrice(grandTotal) }}</span>
+      </div>
+      <button class="btn-checkout" (click)="proceedToCheckout()">Proceed to Checkout</button>
+      <button class="btn-continue-shopping" (click)="continueShopping()">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

@@ -1,0 +1,149 @@
+<!-- Room Configuration Modal -->
+<app-room-config-modal 
+    *ngIf="showConfigModal"
+    (roomConfigured)="onRoomConfigured($event)">
+</app-room-config-modal>
+
+<!-- Furniture Sidebar (only show after configuration) -->
+<app-furniture-sidebar 
+    *ngIf="!showConfigModal"
+    (itemSelected)="onFurnitureItemSelected($event)"
+    (sidebarToggled)="onSidebarToggled($event)">
+</app-furniture-sidebar>
+
+<!-- Always Visible Action Buttons -->
+<div *ngIf="!showConfigModal" class="fixed top-2 sm:top-4 right-2 sm:right-4 z-20 space-y-2 sm:space-y-3">
+    <button (click)="toggleCameraView()"
+            class="action-btn"
+            [class.icon-only-mobile]="isMobileSidebarOpen">
+        <span class="icon-part">{{ isInsideView ? '📷' : '🏠' }}</span>
+        <span class="text-part">{{ isInsideView ? ' Outside View' : ' Inside View' }}</span>
+    </button>
+    
+    <button (click)="viewCart()"
+            class="action-btn cart-btn"
+            [class.icon-only-mobile]="isMobileSidebarOpen">
+        <span class="icon-part">🛒</span>
+        <span class="text-part"> Add to Cart</span>
+    </button>
+    
+    <!-- Collapsible Right Panel Toggle Button -->
+    <button 
+        (click)="toggleRightPanel()"
+        class="action-btn settings-btn"
+        [class.icon-only-mobile]="isMobileSidebarOpen">
+        <span class="transition-transform duration-300" 
+              [class.rotate-180]="!isRightPanelCollapsed">
+            ⚙️
+        </span>
+        <span class="text-part">Settings</span>
+    </button>
+</div>
+
+<!-- Controls Panel - Collapsible (only show after configuration) -->
+<div *ngIf="!showConfigModal" 
+     [class]="isRightPanelCollapsed ? 'fixed top-[160px] sm:top-[220px] right-2 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 sm:p-4 z-10 shadow-lg w-[calc(100%-1rem)] sm:w-auto sm:min-w-[240px] transition-all duration-300 translate-x-[calc(100%+1rem)]' : 'fixed top-[160px] sm:top-[220px] right-2 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 sm:p-4 z-10 shadow-lg w-[calc(100%-1rem)] sm:w-auto sm:min-w-[240px] transition-all duration-300'">
+    
+    <h3 class="m-0 mb-2 sm:mb-3 text-base sm:text-lg text-gray-800 font-bold border-b pb-2">Dimensions</h3>
+    
+    <div class="space-y-3 mb-4">
+        <div class="flex items-center justify-between text-sm">
+            <label class="font-medium text-gray-700">Width:</label>
+            <input type="number" [(ngModel)]="roomWidth" (input)="updateRoom()" step="0.1" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:border-indigo-500 focus:outline-none" />
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+            <label class="font-medium text-gray-700">Height:</label>
+            <input type="number" [(ngModel)]="roomHeight" (input)="updateRoom()" step="0.1" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:border-indigo-500 focus:outline-none" />
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+            <label class="font-medium text-gray-700">Depth:</label>
+            <input type="number" [(ngModel)]="roomDepth" (input)="updateRoom()" step="0.1" 
+                    class="w-20 px-2 py-1 border border-gray-300 rounded focus:border-indigo-500 focus:outline-none" />
+        </div>
+    </div>
+
+    <h3 class="m-0 mb-3 text-lg text-gray-800 font-bold border-b pb-2">Wall Colour</h3>
+    
+    <div class="mb-4">
+        <input type="color" [(ngModel)]="wallColor" (input)="updateWallColor()" 
+                class="w-full h-10 rounded cursor-pointer border-2 border-gray-300" />
+    </div>
+
+    <h3 class="m-0 mb-3 text-lg text-gray-800 font-bold border-b pb-2">Floor Texture</h3>
+    
+    <div class="mb-3">
+        <select [(ngModel)]="floorTexture" (change)="updateFloorTexture()"
+                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer
+                       focus:border-indigo-500 focus:outline-none bg-white">
+            <option value="color">Solid Color</option>
+            <option value="wood">Wood</option>
+            <option value="tile">Tile</option>
+            <option value="concrete">Concrete</option>
+            <option value="carpet">Carpet</option>
+        </select>
+    </div>
+    
+    <div *ngIf="floorTexture === 'color'" class="mb-4">
+        <label class="block text-xs text-gray-600 mb-1">Color:</label>
+        <input type="color" [(ngModel)]="floorColor" (input)="updateFloorColor()" 
+                class="w-full h-10 rounded cursor-pointer border-2 border-gray-300" />
+    </div>
+</div>
+
+<!-- Return to Store Button - Bottom Right -->
+<div *ngIf="!showConfigModal" class="fixed bottom-2 sm:bottom-4 right-2 sm:right-4 z-20">
+    <button (click)="returnToStore()"
+            class="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-br from-gray-600 to-gray-800 text-white 
+                    border-none rounded-lg text-sm sm:text-base font-bold cursor-pointer 
+                    transition-all duration-300 shadow-lg
+                    hover:-translate-y-1 hover:shadow-xl
+                    active:translate-y-0 active:shadow-md
+                    flex items-center gap-2">
+        <span>←</span>
+        <span class="hidden sm:inline">Back to Store</span>
+        <span class="sm:hidden">Back</span>
+    </button>
+</div>
+
+<!-- Selected Object Tooltip -->
+<div *ngIf="selectedObject" 
+        class="absolute top-2 sm:top-4 left-[40%] sm:left-1/2 -translate-x-1/2 
+            bg-gradient-to-br from-cyan-400 to-blue-600 text-white 
+            px-3 sm:px-5 py-2 sm:py-3 rounded-xl shadow-lg shadow-blue-500/40 z-[15]
+            animate-slideDown max-w-[calc(100%-1rem)] sm:max-w-none">
+    <div class="flex items-center gap-2 sm:gap-3">
+        <span class="text-xl sm:text-2xl">🪑</span>
+        <div class="flex flex-col gap-1 w-full">
+            <strong class="text-sm sm:text-base capitalize">{{ selectedObjectDisplayName }}</strong>
+            <div class="hidden sm:flex gap-4 text-[13px] opacity-90">
+                <span class="flex items-center gap-1">🖱️ Drag to move</span>
+                <span class="flex items-center gap-1">🔄 Scroll to rotate ({{ currentRotationDegrees }}°)</span>
+                <span class="flex items-center gap-1">🗑️ Middle click to delete</span>
+            </div>
+            <!-- Mobile: Show rotation slider -->
+            <div class="flex sm:hidden flex-col gap-2 mt-1">
+                <div class="flex items-center gap-2 text-[11px] opacity-90">
+                    <span>🔄 Rotate: {{ currentRotationDegrees }}°</span>
+                    <button (click)="deleteSelectedObject()" 
+                            class="ml-auto px-2 py-1 bg-red-500 rounded text-white text-xs">
+                        🗑️ Delete
+                    </button>
+                </div>
+                <input type="range" 
+                       min="0" 
+                       max="360" 
+                       step="5"
+                       [value]="currentRotationDegrees"
+                       (input)="onRotationSliderChange($event)"
+                       class="w-full h-2 bg-white/30 rounded-lg appearance-none cursor-pointer slider" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3D Renderer Container -->
+<div #rendererContainer class="w-full h-screen block bg-gray-100"></div>
