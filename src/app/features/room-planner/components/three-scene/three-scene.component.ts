@@ -70,6 +70,10 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   private movableObjects: THREE.Object3D[] = [];
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
+  private readonly PLY_PRODUCT_IDS = new Set<string>([
+    '69a308c3ea78ee8f8426f76a'
+  ]);
+
   constructor(
     private cartService: CartService,
     private router: Router,
@@ -103,16 +107,6 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     
     // Initialize the 3D scene
     this.initializeScene();
-
-    // Spawn default heater in the centre of the room
-    setTimeout(() => {
-      this.loadPlyWithRotation(
-        'assets/models/Heater.ply',
-        'Heater',
-        new THREE.Vector3(0, -this.roomHeight / 2, 0),
-        0
-      );
-    }, 100);
 
     this.triggerSave();
   }
@@ -819,6 +813,23 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   }
 
   onFurnitureItemSelected(item: FurnitureItem, dropPosition?: THREE.Vector3): void {
+    const spawnX = dropPosition?.x ?? 0;
+    const spawnZ = dropPosition?.z ?? 0;
+    const spawnY = -this.roomHeight / 2;
+
+    // If the product model is a PLY file on S3, use PLYLoader
+    if (this.PLY_PRODUCT_IDS.has(item.productId)) {
+      const plyPath = item.path.replace('model.glb', 'model.ply');
+      this.loadPlyWithRotation(
+        plyPath,
+        item.displayName,
+        new THREE.Vector3(spawnX, spawnY, spawnZ),
+        0,
+        item
+      );
+      return;
+    }
+
     const loader = new GLTFLoader();
     loader.load(
       item.path,
@@ -831,6 +842,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         obj.userData['imageUrl'] = item.imageUrl;
         obj.userData['path'] = item.path;
         obj.userData['categories'] = item.categories;
+        obj.userData['loaderType'] = 'gltf';
 
         // Enable shadows
         obj.traverse((child) => {
@@ -842,16 +854,11 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         });
 
         // Align bottom with floor
-        obj.position.y = -this.roomHeight / 2;
+        obj.position.y = spawnY;
 
         // Set position: use drop position if provided, otherwise center
-        if (dropPosition) {
-          obj.position.x = dropPosition.x;
-          obj.position.z = dropPosition.z;
-        } else {
-          obj.position.x = 0;
-          obj.position.z = 0;
-        }
+        obj.position.x = spawnX;
+        obj.position.z = spawnZ;
 
         // Add to scene first
         this.roomGroup.add(obj);
@@ -883,6 +890,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         obj.userData['imageUrl'] = item.imageUrl;
         obj.userData['path'] = item.path;
         obj.userData['categories'] = item.categories;
+        obj.userData['loaderType'] = 'gltf';
 
         obj.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
@@ -903,7 +911,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  private loadPlyWithRotation(plyPath: string, displayName: string, position: THREE.Vector3, rotationY: number): void {
+  private loadPlyWithRotation(plyPath: string, displayName: string, position: THREE.Vector3, rotationY: number, item?: FurnitureItem): void {
     const loader = new PLYLoader();
     loader.load(
       plyPath,
@@ -922,14 +930,14 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         const obj = new THREE.Group();
         obj.add(mesh);
 
-        obj.name = 'heater-default';
+        obj.name = item?.name || 'heater-default';
         obj.userData['displayName'] = displayName;
         obj.userData['loaderType'] = 'ply';
         obj.userData['path'] = plyPath;
-        obj.userData['productId'] = '';
-        obj.userData['price'] = 0;
-        obj.userData['imageUrl'] = '';
-        obj.userData['categories'] = [];
+        obj.userData['productId'] = item?.productId || '';
+        obj.userData['price'] = item?.price || 0;
+        obj.userData['imageUrl'] = item?.imageUrl || '';
+        obj.userData['categories'] = item?.categories || [];
 
         obj.position.set(position.x, position.y, position.z);
         obj.rotation.y = rotationY;
@@ -990,19 +998,19 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
         if (Array.isArray(data.objects)) {
           data.objects.forEach((obj: any) => {
             const position = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+            const restoredItem: FurnitureItem = {
+              name: obj.name,
+              displayName: obj.displayName,
+              path: obj.path,
+              productId: obj.productId,
+              price: obj.price,
+              imageUrl: obj.imageUrl,
+              categories: obj.categories || []
+            };
             if (obj.loaderType === 'ply') {
-              this.loadPlyWithRotation(obj.path, obj.displayName || 'Object', position, obj.rotationY ?? 0);
+              this.loadPlyWithRotation(obj.path, obj.displayName || 'Object', position, obj.rotationY ?? 0, restoredItem);
             } else {
-              const item: FurnitureItem = {
-                name: obj.name,
-                displayName: obj.displayName,
-                path: obj.path,
-                productId: obj.productId,
-                price: obj.price,
-                imageUrl: obj.imageUrl,
-                categories: obj.categories || []
-              };
-              this.loadFurnitureWithRotation(item, position, obj.rotationY ?? 0);
+              this.loadFurnitureWithRotation(restoredItem, position, obj.rotationY ?? 0);
             }
           });
         }
