@@ -21,6 +21,7 @@ export class CheckoutComponent implements OnInit {
   cartItems: CartItem[] = [];
   subtotal: number = 0;
   shopBaseUrl: string = '';
+  shopCurrency: string = 'USD';
   currentUser: User | null = null;
   
   // Form fields
@@ -73,6 +74,7 @@ export class CheckoutComponent implements OnInit {
     this.shopService.currentShop$.subscribe(shop => {
       if (shop) {
         this.shopBaseUrl = `/${this.shopService.titleToUrl(shop.title)}`;
+        this.shopCurrency = shop.currency || 'USD';
       }
     });
   }
@@ -144,7 +146,8 @@ export class CheckoutComponent implements OnInit {
         try {
           this.stripeService.checkout({
             items: this.cartItems,
-            user: this.currentUser
+            user: this.currentUser,
+            currency: this.shopCurrency
           }).then(() => {
             // Success - redirect
           }).catch((error: any) => {

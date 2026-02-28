@@ -113,7 +113,16 @@
     <!-- Tab 2: Products -->
     @if (activeTab === 'products') {
       <section class="tab-content">
-        <h1>Products</h1>
+        <div class="tab-header">
+          <h1>Products</h1>
+          <button class="btn-add" disabled title="Coming soon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add New Product
+          </button>
+        </div>
 
         @if (productSaveMessage) {
           <div class="success-banner">{{ productSaveMessage }}</div>
@@ -157,10 +166,11 @@
                     } @else {
                       <td>{{ product.name }}</td>
                       <td class="desc-cell">{{ product.description || '—' }}</td>
-                      <td>{{ product.price | currency }}</td>
+                      <td>{{ product.price | currency:(shop?.currency || 'USD') }}</td>
                       <td class="actions">
                         <div class="actions-inner">
                           <button class="btn-edit" (click)="startEditProduct(product)">Edit</button>
+                          <button class="btn-delete" disabled title="Coming soon">Delete</button>
                         </div>
                       </td>
                     }
@@ -183,6 +193,12 @@
         }
         @if (userDeleteError) {
           <div class="error-banner">{{ userDeleteError }}</div>
+        }
+        @if (userRoleMessage) {
+          <div class="success-banner">{{ userRoleMessage }}</div>
+        }
+        @if (userRoleError) {
+          <div class="error-banner">{{ userRoleError }}</div>
         }
 
         @if (usersLoading) {
@@ -208,9 +224,20 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.createdAt ? (user.createdAt | date:'mediumDate') : '—' }}</td>
                     <td>
-                      <span class="role-badge" [class.admin]="user.role.toLowerCase() === 'admin'">
-                        {{ user.role }}
-                      </span>
+                      @if (user._id === currentUser?._id) {
+                        <span class="role-badge" [class.admin]="user.role.toLowerCase() === 'admin'">
+                          {{ user.role }}
+                        </span>
+                      } @else {
+                        <select
+                          class="role-select"
+                          [value]="user.role"
+                          [disabled]="updatingRoleUserId === user._id"
+                          (change)="changeUserRole(user, $any($event.target).value)">
+                          <option value="customer">customer</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      }
                     </td>
                     <td class="actions">
                       <div class="actions-inner">

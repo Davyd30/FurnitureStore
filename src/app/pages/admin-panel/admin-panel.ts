@@ -18,6 +18,7 @@ import { Product } from '../../models/product.interface';
 export class AdminPanelComponent implements OnInit {
   currentUser: User | null = null;
   activeTab: 'website' | 'products' | 'users' = 'website';
+  private readonly TAB_KEY = 'adminActiveTab';
 
   // Tab 1: Edit Website
   shop: Shop | null = null;
@@ -38,6 +39,9 @@ export class AdminPanelComponent implements OnInit {
   users: User[] = [];
   userDeleteMessage = '';
   userDeleteError = '';
+  userRoleMessage = '';
+  userRoleError = '';
+  updatingRoleUserId: string | null = null;
   usersLoading = false;
 
   // Mobile sidebar
@@ -58,10 +62,15 @@ export class AdminPanelComponent implements OnInit {
     this.loadShop();
     this.loadProducts();
     this.loadUsers();
+    const saved = localStorage.getItem(this.TAB_KEY) as 'website' | 'products' | 'users' | null;
+    if (saved && ['website', 'products', 'users'].includes(saved)) {
+      this.activeTab = saved;
+    }
   }
 
   setActiveTab(tab: 'website' | 'products' | 'users'): void {
     this.activeTab = tab;
+    localStorage.setItem(this.TAB_KEY, tab);
     this.sidebarOpen = false;
     this.clearMessages();
   }
@@ -162,7 +171,15 @@ export class AdminPanelComponent implements OnInit {
         next: (updated) => {
           const idx = this.products.findIndex((p) => p._id === product._id);
           if (idx !== -1) {
-            this.products[idx] = { ...this.products[idx], ...updated };
+            this.products[idx] = {
+              ...this.products[idx],
+              ...updated,
+              name: this.productEditForm.name,
+              description: this.productEditForm.description,
+              price: Number(this.productEditForm.price),
+              image: this.products[idx].image,
+            };
+            this.products = [...this.products];
           }
           this.editingProductId = null;
           this.productSaveMessage = 'Product updated successfully!';
@@ -196,6 +213,24 @@ export class AdminPanelComponent implements OnInit {
     return true;
   }
 
+  changeUserRole(user: User, newRole: string): void {
+    if (user._id === this.currentUser?._id) return;
+    if (user.role === newRole) return;
+    this.clearMessages();
+    this.updatingRoleUserId = user._id;
+    this.adminService.updateUserRole(user._id, newRole).subscribe({
+      next: () => {
+        user.role = newRole;
+        this.updatingRoleUserId = null;
+        this.userRoleMessage = `Role updated to "${newRole}" for ${user.fullName}.`;
+      },
+      error: () => {
+        this.updatingRoleUserId = null;
+        this.userRoleError = 'Failed to update role';
+      },
+    });
+  }
+
   deleteUser(user: User): void {
     if (!this.canDeleteUser(user)) return;
     if (!confirm(`Are you sure you want to delete user "${user.fullName}"?`)) return;
@@ -225,5 +260,7 @@ export class AdminPanelComponent implements OnInit {
     this.productSaveError = '';
     this.userDeleteMessage = '';
     this.userDeleteError = '';
+    this.userRoleMessage = '';
+    this.userRoleError = '';
   }
 }

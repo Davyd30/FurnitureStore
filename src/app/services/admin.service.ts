@@ -72,4 +72,8 @@ export class AdminService {
   deleteUser(userId: string): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/users/${userId}`);
   }
+
+  updateUserRole(userId: string, role: string): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/users/${userId}`, { role });
+  }
 }

@@ -6,6 +6,7 @@ import { User } from '../models/user.interface';
 export interface CheckoutSessionRequest {
     items: CartItem[];
     user: User;
+    currency: string;
 }
 
 @Injectable({
@@ -27,7 +28,7 @@ export class StripeService {
 
         // Add line items
         request.items.forEach((item, index) => {
-            formData.append(`line_items[${index}][price_data][currency]`, 'usd');
+            formData.append(`line_items[${index}][price_data][currency]`, (request.currency || 'usd').toLowerCase());
             formData.append(`line_items[${index}][price_data][product_data][name]`, item.name || 'Product');
             formData.append(`line_items[${index}][price_data][unit_amount]`, Math.round(item.price * 100).toString());
             formData.append(`line_items[${index}][quantity]`, item.quantity.toString());
