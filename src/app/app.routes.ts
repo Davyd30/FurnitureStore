@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { shopResolver } from './resolvers/shop.resolver';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   // Landing page - list all shops
@@ -13,6 +14,18 @@ export const routes: Routes = [
     path: '404',
     loadComponent: () =>
       import('./pages/not-found/not-found').then(m => m.NotFoundComponent),
+  },
+  // Admin routes (must be before :shopTitle to avoid conflict)
+  {
+    path: 'admin/login',
+    loadComponent: () =>
+      import('./pages/admin-login/admin-login').then((m) => m.AdminLoginComponent),
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/admin-panel/admin-panel').then((m) => m.AdminPanelComponent),
   },
   // Shop-specific routes with title-based URL
   {

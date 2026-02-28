@@ -9,4 +9,5 @@ export interface Shop {
   slogan: string;
   heroImage: string;
   currency: string;
+  buttonText?: string;
 }
