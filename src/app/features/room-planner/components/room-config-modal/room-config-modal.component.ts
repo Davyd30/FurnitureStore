@@ -21,6 +21,7 @@ export interface RoomConfig {
 })
 export class RoomConfigModalComponent {
   @Output() roomConfigured = new EventEmitter<RoomConfig>();
+  @Output() cancelled = new EventEmitter<void>();
 
   selectedShape: 'rectangle' | 'square' = 'rectangle';
   roomWidth = 6;

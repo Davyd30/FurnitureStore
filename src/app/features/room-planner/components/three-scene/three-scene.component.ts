@@ -111,6 +111,22 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
     this.triggerSave();
   }
 
+  onModalCancelled(): void {
+    const shop = this.shopService.getCurrentShop();
+    if (shop) {
+      const shopUrl = this.shopService.titleToUrl(shop.title);
+      this.router.navigate([`/${shopUrl}/`]);
+    } else {
+      const segments = window.location.pathname.split('/').filter(s => s);
+      const shopSegment = segments[0];
+      if (shopSegment) {
+        this.router.navigate([`/${shopSegment}/`]);
+      } else {
+        this.router.navigate(['/']);
+      }
+    }
+  }
+
   private initializeScene(): void {
     this.initThree();
     this.buildRoom();
@@ -176,12 +192,13 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.saveTimer) clearTimeout(this.saveTimer);
+    if (!this.renderer) return;
     window.removeEventListener('resize', this.onWindowResize);
     document.body.removeEventListener('dragover', this.handleDragOver);
     document.body.removeEventListener('drop', this.handleDrop);
     this.removeMouseEvents();
     this.stopRenderingLoop();
-    this.controls.dispose();
+    this.controls?.dispose();
     this.renderer.dispose();
   }
 
@@ -467,6 +484,7 @@ export class ThreeSceneComponent implements AfterViewInit, OnDestroy {
   }
 
   private removeMouseEvents() {
+    if (!this.renderer) return;
     const canvas = this.renderer.domElement;
     canvas.removeEventListener('mousedown', this.onMouseDown);
     canvas.removeEventListener('mousemove', this.onMouseMove);

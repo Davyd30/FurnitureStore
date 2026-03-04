@@ -1,7 +1,8 @@
 <!-- Room Configuration Modal -->
 <app-room-config-modal 
     *ngIf="showConfigModal"
-    (roomConfigured)="onRoomConfigured($event)">
+    (roomConfigured)="onRoomConfigured($event)"
+    (cancelled)="onModalCancelled()">
 </app-room-config-modal>
 
 <!-- Furniture Sidebar (only show after configuration) -->
