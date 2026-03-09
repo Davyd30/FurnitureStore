@@ -147,7 +147,8 @@ export class CheckoutComponent implements OnInit {
           this.stripeService.checkout({
             items: this.cartItems,
             user: this.currentUser,
-            currency: this.shopCurrency
+            currency: this.shopCurrency,
+            shopUrl: this.shopBaseUrl.replace(/^\//, '')
           }).then(() => {
             // Success - redirect
           }).catch((error: any) => {

@@ -7,6 +7,7 @@ export interface CheckoutSessionRequest {
     items: CartItem[];
     user: User;
     currency: string;
+    shopUrl: string;
 }
 
 @Injectable({
@@ -21,8 +22,8 @@ export class StripeService {
         // Build form data for Stripe API
         const formData = new URLSearchParams();
         formData.append('mode', 'payment');
-        formData.append('success_url', `${window.location.origin}/success`);
-        formData.append('cancel_url', `${window.location.origin}/cancel`);
+        formData.append('success_url', `${window.location.origin}/success?shop=${encodeURIComponent(request.shopUrl)}`);
+        formData.append('cancel_url', `${window.location.origin}/cancel?shop=${encodeURIComponent(request.shopUrl)}`);
         formData.append('customer_email', request.user.email || '');
         formData.append('client_reference_id', request.user._id || '');
 

@@ -27,6 +27,17 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/admin-panel/admin-panel').then((m) => m.AdminPanelComponent),
   },
+  // Post-payment pages
+  {
+    path: 'success',
+    loadComponent: () =>
+      import('./pages/payment-success/payment-success').then((m) => m.PaymentSuccessComponent),
+  },
+  {
+    path: 'cancel',
+    loadComponent: () =>
+      import('./pages/payment-cancel/payment-cancel').then((m) => m.PaymentCancelComponent),
+  },
   // Shop-specific routes with title-based URL
   {
     path: ':shopTitle',

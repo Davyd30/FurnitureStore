@@ -13,8 +13,22 @@ export interface CartItem {
   providedIn: 'root'
 })
 export class CartService {
-  private cartItems = new BehaviorSubject<CartItem[]>([]);
+  private readonly STORAGE_KEY = 'cartItems';
+  private cartItems = new BehaviorSubject<CartItem[]>(this.loadFromStorage());
   cartItems$ = this.cartItems.asObservable();
+
+  private loadFromStorage(): CartItem[] {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private persist(items: CartItem[]): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
+  }
 
   addToCart(product: { id: string; name: string; price: number; image: string }): void {
     const currentItems = this.cartItems.value;
@@ -26,11 +40,13 @@ export class CartService {
     } else {
       this.cartItems.next([...currentItems, { ...product, quantity: 1 }]);
     }
+    this.persist(this.cartItems.value);
   }
 
   removeFromCart(productId: string): void {
     const currentItems = this.cartItems.value;
     this.cartItems.next(currentItems.filter(item => item.id !== productId));
+    this.persist(this.cartItems.value);
   }
 
   updateQuantity(productId: string, quantity: number): void {
@@ -44,6 +60,7 @@ export class CartService {
     if (item) {
       item.quantity = quantity;
       this.cartItems.next([...currentItems]);
+      this.persist(this.cartItems.value);
     }
   }
 
@@ -57,5 +74,6 @@ export class CartService {
 
   clearCart(): void {
     this.cartItems.next([]);
+    localStorage.removeItem(this.STORAGE_KEY);
   }
 }
